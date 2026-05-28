@@ -187,6 +187,7 @@ export default function AdminDashboard() {
                 <th className="py-4 font-bold text-center">Wersja</th>
                 <th className="py-4 font-bold text-center">Wynik</th>
                 <th className="py-4 font-bold text-center">Certyfikat</th>
+                <th className="py-4 font-bold text-center">Karta Odpowiedzi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-sm">
@@ -236,7 +237,22 @@ export default function AdminDashboard() {
                             <span>PDF</span>
                           </a>
                         ) : (
-                          <span className="text-gray-400 text-xs">brak PDF</span>
+                          <span className="text-gray-400 text-xs">brak</span>
+                        )}
+                      </td>
+                      <td className="py-4 text-center">
+                        {(r as any).archive_pdf_url ? (
+                          <a 
+                            href={(r as any).archive_pdf_url} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Archiwum</span>
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 text-xs">brak</span>
                         )}
                       </td>
                     </tr>

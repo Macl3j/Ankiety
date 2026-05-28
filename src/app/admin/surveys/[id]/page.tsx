@@ -29,6 +29,7 @@ interface Survey {
 interface Option {
   text: string;
   correct: boolean;
+  image_url?: string;
 }
 
 interface Question {
@@ -167,6 +168,33 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
       alert("Błąd przesyłania zdjęcia: " + err.message);
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  // Obsługa przesyłania zdjęcia do konkretnej opcji
+  const handleOptionImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${surveyId}/opt_${Date.now()}_${idx}.${fileExt}`;
+      
+      const { error } = await supabase.storage
+        .from('survey-images')
+        .upload(fileName, file, { cacheControl: '3600', upsert: true });
+        
+      if (error) throw error;
+      
+      const { data: publicUrlData } = supabase.storage
+        .from('survey-images')
+        .getPublicUrl(fileName);
+        
+      setNewOptions(
+        newOptions.map((opt, i) => i === idx ? { ...opt, image_url: publicUrlData.publicUrl } : opt)
+      );
+    } catch (err: any) {
+      alert("Błąd przesyłania zdjęcia dla opcji: " + err.message);
     }
   };
 
@@ -451,35 +479,56 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
 
                 <div className="space-y-2.5">
                   {newOptions.map((opt, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleOptionCorrectToggle(idx)}
-                        className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-all ${
-                          opt.correct 
-                            ? 'bg-emerald-500 border-emerald-500 text-white' 
-                            : 'bg-white border-gray-200 text-transparent hover:border-gray-400'
-                        }`}
-                        title="Zaznacz jako poprawną odpowiedź"
-                      >
-                        <Check className="w-4 h-4 stroke-[3]" />
-                      </button>
+                    <div key={idx} className="flex flex-col gap-2 p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleOptionCorrectToggle(idx)}
+                          className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-all shadow-sm ${
+                            opt.correct 
+                              ? 'bg-emerald-500 border-emerald-600 text-white scale-105' 
+                              : 'bg-white border-gray-300 text-transparent hover:border-gray-400'
+                          }`}
+                          title="Zaznacz jako poprawną odpowiedź (Ważne do naliczania punktów!)"
+                        >
+                          <Check className="w-5 h-5 stroke-[3]" />
+                        </button>
 
-                      <input
-                        type="text"
-                        value={opt.text}
-                        onChange={(e) => handleOptionTextChange(idx, e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
-                      />
+                        <input
+                          type="text"
+                          value={opt.text}
+                          onChange={(e) => handleOptionTextChange(idx, e.target.value)}
+                          placeholder={`Treść opcji ${String.fromCharCode(65 + idx)}`}
+                          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
+                        />
 
-                      <button
-                        type="button"
-                        onClick={() => removeOptionField(idx)}
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                        disabled={newOptions.length <= 1}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                        <label className="p-2 text-gray-500 hover:text-[#1a2a3a] hover:bg-gray-200 rounded-lg transition-colors cursor-pointer" title="Dodaj zdjęcie do opcji">
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleOptionImageUpload(e, idx)} />
+                          <Plus className="w-4 h-4" />
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => removeOptionField(idx)}
+                          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                          disabled={newOptions.length <= 1}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      
+                      {opt.image_url && (
+                        <div className="relative mt-1 ml-10 w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                          <img src={opt.image_url} className="w-full h-full object-cover" alt="Opcja podgląd" />
+                          <button
+                            type="button"
+                            onClick={() => setNewOptions(newOptions.map((o, i) => i === idx ? { ...o, image_url: undefined } : o))}
+                            className="absolute top-1 right-1 p-0.5 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -575,14 +624,21 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                           return (
                             <div 
                               key={oIdx} 
-                              className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs ${
+                              className={`flex flex-col gap-2 p-2.5 rounded-lg border text-xs ${
                                 isCorrect 
                                   ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold' 
                                   : 'bg-gray-50 border-gray-100 text-gray-600'
                               }`}
                             >
-                              <span className={`w-2 h-2 rounded-full ${isCorrect ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
-                              <span className="truncate">{text}</span>
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full shrink-0 ${isCorrect ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
+                                <span className="truncate">{text}</span>
+                              </div>
+                              {(opt as any).image_url && (
+                                <div className="ml-4 w-16 h-16 rounded overflow-hidden border border-gray-200 bg-white">
+                                  <img src={(opt as any).image_url} className="w-full h-full object-cover" alt="Opcja miniaturka" />
+                                </div>
+                              )}
                             </div>
                           );
                         })}

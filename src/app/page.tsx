@@ -384,6 +384,11 @@ export default function StudentPortal() {
                             onChange={() => handleAnswerChange(q.id, text)}
                             className="w-5 h-5 text-[#c5a059] focus:ring-[#c5a059]"
                           />
+                          {(opt as any).image_url && (
+                            <div className="w-12 h-12 rounded overflow-hidden border border-gray-200 bg-white shrink-0">
+                              <img src={(opt as any).image_url} className="w-full h-full object-cover" alt="Opcja" />
+                            </div>
+                          )}
                           <span className="text-sm text-[#1a2a3a]">{text}</span>
                         </label>
                       );
@@ -422,6 +427,11 @@ export default function StudentPortal() {
                             onChange={toggleCheck}
                             className="w-5 h-5 rounded text-[#c5a059] focus:ring-[#c5a059]"
                           />
+                          {(opt as any).image_url && (
+                            <div className="w-12 h-12 rounded overflow-hidden border border-gray-200 bg-white shrink-0">
+                              <img src={(opt as any).image_url} className="w-full h-full object-cover" alt="Opcja" />
+                            </div>
+                          )}
                           <span className="text-sm text-[#1a2a3a]">{text}</span>
                         </label>
                       );

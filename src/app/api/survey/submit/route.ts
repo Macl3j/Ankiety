@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseClient';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { CertificateTemplate } from '@/components/CertificateTemplate';
+import { SurveyArchiveTemplate } from '@/components/SurveyArchiveTemplate';
 
 export async function POST(request: Request) {
   try {
@@ -151,6 +152,53 @@ export async function POST(request: Request) {
       console.error("Generowanie PDF nie powiodło się: ", pdfErr);
     }
 
+    // 6b. Generowanie archiwum ankiety w formacie PDF
+    let archiveUrl = null;
+    try {
+      const answersList = questions.map((q: any, i: number) => {
+        return {
+          nr: i + 1,
+          question: q.text,
+          answer: answers[q.id] || ''
+        };
+      });
+
+      const archiveBuffer = await renderToBuffer(
+        React.createElement(SurveyArchiveTemplate, {
+          studentName: `${student.first_name} ${student.last_name}`,
+          studentCode: student.code,
+          school: student.school,
+          studentClass: student.class,
+          dateStr,
+          consent,
+          surveyTitle: survey.title,
+          taskId: survey.task_id,
+          version: survey.version,
+          answersList,
+        }) as any
+      );
+
+      const archiveFileName = `Zadanie_${survey.task_id}/${student.code}_${survey.version}_archive.pdf`;
+      
+      const { error: archiveUploadErr } = await supabaseAdmin.storage
+        .from('survey-archives')
+        .upload(archiveFileName, archiveBuffer, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+
+      if (!archiveUploadErr) {
+        const { data: archivePublicUrlData } = supabaseAdmin.storage
+          .from('survey-archives')
+          .getPublicUrl(archiveFileName);
+        archiveUrl = archivePublicUrlData.publicUrl;
+      } else {
+        console.error("Storage archive upload error: ", archiveUploadErr);
+      }
+    } catch (archiveErr) {
+      console.error("Generowanie Archiwum PDF nie powiodło się: ", archiveErr);
+    }
+
     // 7. Zapisanie odpowiedzi w bazie danych
     const { data: response, error: responseErr } = await supabaseAdmin
       .from('responses')
@@ -163,7 +211,8 @@ export async function POST(request: Request) {
         score,
         max_score: maxScore,
         consent,
-        cert_pdf_url: certUrl
+        cert_pdf_url: certUrl,
+        archive_pdf_url: archiveUrl
       })
       .select()
       .single();
