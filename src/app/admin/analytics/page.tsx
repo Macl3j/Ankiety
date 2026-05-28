@@ -109,7 +109,7 @@ export default function AnalyticsPage() {
                 <YAxis tick={{fontSize: 12}} domain={[0, 100]} unit="%" />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [`${value}%`, 'Średnia']}
+                  formatter={(value: any) => [`${value}%`, 'Średnia']}
                 />
                 <Bar dataKey="avg" radius={[4, 4, 0, 0]} maxBarSize={50}>
                   {data.schoolsData.map((entry: any, index: number) => (
@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
                 </Pie>
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [value, 'Uczniów']}
+                  formatter={(value: any) => [value, 'Uczniów']}
                 />
                 <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
                 <YAxis tick={{fontSize: 12}} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [value, 'Wypełnione ankiety']}
+                  formatter={(value: any) => [value, 'Wypełnione ankiety']}
                 />
                 <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
               </AreaChart>
