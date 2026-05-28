@@ -12,34 +12,34 @@ if (isServer) {
   Font.register({
     family: 'Merriweather',
     fonts: [
-      { src: path.join(fontsDir, 'Merriweather-Regular.ttf') },
-      { src: path.join(fontsDir, 'Merriweather-Bold.ttf'), fontWeight: 'bold' },
-      { src: path.join(fontsDir, 'Merriweather-Italic.ttf'), fontStyle: 'italic' }
+      { src: path.join(fontsDir, 'Merriweather-Regular.woff') },
+      { src: path.join(fontsDir, 'Merriweather-Bold.woff'), fontWeight: 'bold' },
+      { src: path.join(fontsDir, 'Merriweather-Italic.woff'), fontStyle: 'italic' }
     ]
   });
 
   Font.register({
     family: 'Roboto',
     fonts: [
-      { src: path.join(fontsDir, 'Roboto-Regular.ttf') },
-      { src: path.join(fontsDir, 'Roboto-Bold.ttf'), fontWeight: 'bold' }
+      { src: path.join(fontsDir, 'Roboto-Regular.woff') },
+      { src: path.join(fontsDir, 'Roboto-Bold.woff'), fontWeight: 'bold' }
     ]
   });
 } else {
   Font.register({
     family: 'Merriweather',
     fonts: [
-      { src: '/fonts/Merriweather-Regular.ttf' },
-      { src: '/fonts/Merriweather-Bold.ttf', fontWeight: 'bold' },
-      { src: '/fonts/Merriweather-Italic.ttf', fontStyle: 'italic' }
+      { src: '/fonts/Merriweather-Regular.woff' },
+      { src: '/fonts/Merriweather-Bold.woff', fontWeight: 'bold' },
+      { src: '/fonts/Merriweather-Italic.woff', fontStyle: 'italic' }
     ]
   });
 
   Font.register({
     family: 'Roboto',
     fonts: [
-      { src: '/fonts/Roboto-Regular.ttf' },
-      { src: '/fonts/Roboto-Bold.ttf', fontWeight: 'bold' }
+      { src: '/fonts/Roboto-Regular.woff' },
+      { src: '/fonts/Roboto-Bold.woff', fontWeight: 'bold' }
     ]
   });
 }
