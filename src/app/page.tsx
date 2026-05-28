@@ -357,6 +357,13 @@ export default function StudentPortal() {
                   {idx + 1}. {q.text}
                 </h4>
 
+                {/* Wyświetlanie zdjęcia pytania (ilustracja) */}
+                {q.image_url && (
+                  <div className="w-full max-h-64 rounded-xl overflow-hidden border border-gray-100 mb-4 bg-white flex items-center justify-center">
+                    <img src={q.image_url} className="max-h-64 object-contain" alt="Ilustracja do pytania" />
+                  </div>
+                )}
+
                 {/* OPCJA: SINGLE (Jednokrotny wybór) */}
                 {q.type === 'SINGLE' && (
                   <div className="space-y-2.5">

@@ -39,6 +39,7 @@ interface Question {
   options: Option[];
   order_index: number;
   weight: number;
+  image_url?: string;
 }
 
 export default function EditSurvey({ params }: { params: Promise<{ id: string }> }) {
@@ -59,6 +60,8 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
     { text: 'Opcja A', correct: false },
     { text: 'Opcja B', correct: false }
   ]);
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     fetchSurveyDetails();
@@ -136,6 +139,37 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
     );
   };
 
+  // Obsługa przesyłania zdjęcia do Supabase Storage
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${surveyId}/${Date.now()}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('survey-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+        
+      if (error) throw error;
+      
+      const { data: publicUrlData } = supabase.storage
+        .from('survey-images')
+        .getPublicUrl(fileName);
+        
+      setNewImageUrl(publicUrlData.publicUrl);
+    } catch (err: any) {
+      alert("Błąd przesyłania zdjęcia: " + err.message);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   // Zaznaczenie poprawnej odpowiedzi (dla SINGLE wybiera jedną, dla MULTI pozwala na wiele)
   const handleOptionCorrectToggle = (idx: number) => {
     if (newType === 'SINGLE') {
@@ -164,13 +198,15 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
       text: newText.trim(),
       options: qOptions,
       order_index: questions.length + 1,
-      weight: 1
+      weight: 1,
+      image_url: newImageUrl || undefined
     };
 
     setQuestions([...questions, newQ]);
     
     // Zresetowanie formularza dodawania pytań
     setNewText('');
+    setNewImageUrl('');
     setNewOptions([
       { text: 'Opcja A', correct: false },
       { text: 'Opcja B', correct: false }
@@ -228,7 +264,8 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
           text: q.text,
           options: JSON.stringify(q.options || []),
           order_index: idx + 1,
-          weight: q.weight
+          weight: q.weight,
+          image_url: q.image_url || null
         }));
 
         const { error: insErr } = await supabase
@@ -362,6 +399,42 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
               />
             </div>
 
+            {/* DODAWANIE ZDJĘCIA (ILUSTRACJI) */}
+            <div className="space-y-1">
+              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider block">Ilustracja pytania (Opcjonalnie)</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="hidden"
+                  id="question-image-upload"
+                />
+                <label
+                  htmlFor="question-image-upload"
+                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  {uploadingImage ? 'Przesyłanie...' : 'Dodaj Zdjęcie'}
+                </label>
+                {newImageUrl && (
+                  <span className="text-xs text-emerald-600 font-semibold truncate max-w-[150px]">Zdjęcie wgrane!</span>
+                )}
+              </div>
+              {newImageUrl && (
+                <div className="relative mt-2 w-24 h-24 rounded-lg overflow-hidden border border-gray-100">
+                  <img src={newImageUrl} className="w-full h-full object-cover" alt="Podgląd" />
+                  <button
+                    type="button"
+                    onClick={() => setNewImageUrl('')}
+                    className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* EDYCJA OPCJI (Tylko dla SINGLE / MULTI) */}
             {['SINGLE', 'MULTI'].includes(newType) && (
               <div className="space-y-3 pt-2">
@@ -485,6 +558,13 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                     </div>
 
                     <h4 className="font-serif font-bold text-lg text-[#1a2a3a]">{q.text}</h4>
+
+                    {/* PODGLĄD WGRANEGO ZDJĘCIA */}
+                    {q.image_url && (
+                      <div className="w-32 h-20 rounded-lg overflow-hidden border border-gray-100 mt-2">
+                        <img src={q.image_url} className="w-full h-full object-cover" alt="Podgląd pytania" />
+                      </div>
+                    )}
 
                     {/* OPIS OPCJI JEŚLI WYSTĘPUJĄ */}
                     {['SINGLE', 'MULTI'].includes(q.type) && q.options && (
