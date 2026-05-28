@@ -3,46 +3,31 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import path from 'path';
 
-// Zabezpieczenie przed środowiskiem przeglądarki (w razie kompilacji po stronie klienta)
-const isServer = typeof window === 'undefined';
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') return ''; // browser can use relative paths
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  return 'http://localhost:3000';
+};
 
-if (isServer) {
-  const fontsDir = path.join(process.cwd(), 'public', 'fonts');
-  
-  Font.register({
-    family: 'Merriweather',
-    fonts: [
-      { src: path.join(fontsDir, 'Merriweather-Regular.ttf') },
-      { src: path.join(fontsDir, 'Merriweather-Bold.ttf'), fontWeight: 'bold' },
-      { src: path.join(fontsDir, 'Merriweather-Italic.ttf'), fontStyle: 'italic' }
-    ]
-  });
+const baseUrl = getBaseUrl();
 
-  Font.register({
-    family: 'Roboto',
-    fonts: [
-      { src: path.join(fontsDir, 'Roboto-Regular.ttf') },
-      { src: path.join(fontsDir, 'Roboto-Bold.ttf'), fontWeight: 'bold' }
-    ]
-  });
-} else {
-  Font.register({
-    family: 'Merriweather',
-    fonts: [
-      { src: '/fonts/Merriweather-Regular.ttf' },
-      { src: '/fonts/Merriweather-Bold.ttf', fontWeight: 'bold' },
-      { src: '/fonts/Merriweather-Italic.ttf', fontStyle: 'italic' }
-    ]
-  });
+Font.register({
+  family: 'Merriweather',
+  fonts: [
+    { src: `${baseUrl}/fonts/Merriweather-Regular.ttf` },
+    { src: `${baseUrl}/fonts/Merriweather-Bold.ttf`, fontWeight: 'bold' },
+    { src: `${baseUrl}/fonts/Merriweather-Italic.ttf`, fontStyle: 'italic' }
+  ]
+});
 
-  Font.register({
-    family: 'Roboto',
-    fonts: [
-      { src: '/fonts/Roboto-Regular.ttf' },
-      { src: '/fonts/Roboto-Bold.ttf', fontWeight: 'bold' }
-    ]
-  });
-}
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: `${baseUrl}/fonts/Roboto-Regular.ttf` },
+    { src: `${baseUrl}/fonts/Roboto-Bold.ttf`, fontWeight: 'bold' }
+  ]
+});
 
 // Definicje stylów dla @react-pdf
 const styles = StyleSheet.create({
