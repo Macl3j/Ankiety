@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     let score = 0;
     let maxScore = 0;
 
-    questions.forEach(q => {
+    questions.forEach((q: any) => {
       if (['SINGLE', 'DROPDOWN'].includes(q.type) && Array.isArray(q.options)) {
         // Sprawdzamy czy pytanie posiada zdefiniowaną poprawną odpowiedź
         const correctOpt = q.options.find((o: any) => o.correct === true);

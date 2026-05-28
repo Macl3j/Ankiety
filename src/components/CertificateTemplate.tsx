@@ -1,13 +1,55 @@
 // CertificateTemplate.tsx
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import path from 'path';
+
+// Zabezpieczenie przed środowiskiem przeglądarki (w razie kompilacji po stronie klienta)
+const isServer = typeof window === 'undefined';
+
+if (isServer) {
+  const fontsDir = path.join(process.cwd(), 'public', 'fonts');
+  
+  Font.register({
+    family: 'Merriweather',
+    fonts: [
+      { src: path.join(fontsDir, 'Merriweather-Regular.ttf') },
+      { src: path.join(fontsDir, 'Merriweather-Bold.ttf'), fontWeight: 'bold' },
+      { src: path.join(fontsDir, 'Merriweather-Italic.ttf'), fontStyle: 'italic' }
+    ]
+  });
+
+  Font.register({
+    family: 'Roboto',
+    fonts: [
+      { src: path.join(fontsDir, 'Roboto-Regular.ttf') },
+      { src: path.join(fontsDir, 'Roboto-Bold.ttf'), fontWeight: 'bold' }
+    ]
+  });
+} else {
+  Font.register({
+    family: 'Merriweather',
+    fonts: [
+      { src: '/fonts/Merriweather-Regular.ttf' },
+      { src: '/fonts/Merriweather-Bold.ttf', fontWeight: 'bold' },
+      { src: '/fonts/Merriweather-Italic.ttf', fontStyle: 'italic' }
+    ]
+  });
+
+  Font.register({
+    family: 'Roboto',
+    fonts: [
+      { src: '/fonts/Roboto-Regular.ttf' },
+      { src: '/fonts/Roboto-Bold.ttf', fontWeight: 'bold' }
+    ]
+  });
+}
 
 // Definicje stylów dla @react-pdf
 const styles = StyleSheet.create({
   page: {
     padding: 0,
     backgroundColor: '#fcfcf9', // Ciepły odcień papieru czerpanego
-    fontFamily: 'Times-Roman',
+    fontFamily: 'Merriweather',
     height: '100%',
     width: '100%',
   },
@@ -33,17 +75,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   title: {
-    fontSize: 38,
+    fontSize: 34,
     fontWeight: 'bold',
     color: '#1a2a3a',
     letterSpacing: 2,
     textTransform: 'uppercase',
-    fontFamily: 'Times-Bold',
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#555555',
-    fontFamily: 'Times-Italic',
+    fontStyle: 'italic',
     marginTop: 8,
   },
   studentNameSection: {
@@ -58,7 +99,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: '#c5a059',
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Roboto',
   },
   infoSection: {
     alignItems: 'center',
@@ -67,7 +108,7 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     color: '#444444',
-    fontFamily: 'Times-Italic',
+    fontStyle: 'italic',
     marginBottom: 5,
     textAlign: 'center',
   },
@@ -75,7 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#1a2a3a',
-    fontFamily: 'Times-Bold',
     textAlign: 'center',
   },
   // --- PORÓWNANIE WYNIKÓW ---
@@ -116,7 +156,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 3,
     letterSpacing: 0.5,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
   },
   scoreLabelGrowth: {
     fontSize: 9,
@@ -124,25 +164,24 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 3,
     letterSpacing: 0.5,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
   },
   scoreValue: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1a2a3a',
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Roboto',
   },
   scoreValueGrowth: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2e7d32',
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Roboto',
   },
   metaInfo: {
     fontSize: 13,
     color: '#777777',
     marginTop: 6,
-    fontFamily: 'Times-Roman',
   },
   dateSection: {
     alignItems: 'center',
@@ -151,13 +190,12 @@ const styles = StyleSheet.create({
   dateLabel: {
     fontSize: 14,
     color: '#555555',
-    fontFamily: 'Times-Italic',
+    fontStyle: 'italic',
   },
   dateValue: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1a2a3a',
-    fontFamily: 'Times-Bold',
     marginTop: 2,
   },
 });

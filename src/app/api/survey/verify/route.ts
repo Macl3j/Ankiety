@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     // Klasy ucznia np: '5a', '5b' -> pasują do ankiet dla grupy 'Klasa 5'
     const studentClassNum = student.class.replace(/\D/g, ''); // Wyciąga cyfrę np '5' z '5a'
     
-    const matchedSurveys = surveys.filter(s => {
+    const matchedSurveys = surveys.filter((s: any) => {
       const surveyGroupNum = s.group.replace(/\D/g, ''); // Wyciąga np '5' z 'Klasa 5'
       return studentClassNum === surveyGroupNum;
     });
@@ -48,11 +48,11 @@ export async function POST(request: Request) {
       .eq('student_code', student.code);
 
     const completedMap = new Map();
-    responses?.forEach(r => {
+    responses?.forEach((r: any) => {
       completedMap.set(`${r.task_id}_${r.version}`, true);
     });
 
-    const surveysWithCompletion = matchedSurveys.map(s => ({
+    const surveysWithCompletion = matchedSurveys.map((s: any) => ({
       id: s.id,
       taskId: s.task_id,
       title: s.title,
