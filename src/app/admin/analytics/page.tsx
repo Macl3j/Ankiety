@@ -100,7 +100,7 @@ export default function AnalyticsPage() {
         
         {/* BAR CHART - SCHOOLS */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
-          <h2 className="text-lg font-bold text-[#1a2a3a] mb-6">Porównanie Średniej w Szkołach</h2>
+          <h2 className="text-lg font-bold text-[#1a2a3a] mb-6">Porównanie Średniej w Szkołach (Ogółem)</h2>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.schoolsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -150,6 +150,27 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
+      </div>
+
+      {/* NEW: KNOWLEDGE PROGRESS CHART */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 className="text-lg font-bold text-[#1a2a3a] mb-6">Przyrost Wiedzy (Początkowa vs Ewaluacyjna)</h2>
+        <div className="h-[350px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data.progressData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <XAxis dataKey="name" tick={{fontSize: 12}} tickFormatter={(val) => val.length > 10 ? val.substring(0, 10) + '...' : val} />
+              <YAxis tick={{fontSize: 12}} domain={[0, 100]} unit="%" />
+              <Tooltip 
+                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                formatter={(value: any) => [`${value}%`, '']}
+              />
+              <Legend verticalAlign="top" height={36} iconType="circle" />
+              <Bar dataKey="poczatkowa" name="Ankieta Początkowa" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              <Bar dataKey="ewaluacyjna" name="Ankieta Ewaluacyjna" fill="#22c55e" radius={[4, 4, 0, 0]} maxBarSize={40} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

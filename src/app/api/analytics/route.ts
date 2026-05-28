@@ -9,7 +9,7 @@ export async function GET() {
     // Since we have around 800 responses, we can fetch all and aggregate in memory.
     const { data: responses, error: respError } = await supabaseAdmin
       .from('responses')
-      .select('score, max_score, created_at, student_code');
+      .select('score, max_score, created_at, student_code, version');
       
     if (respError) throw respError;
 
@@ -28,7 +28,12 @@ export async function GET() {
     let totalMaxScore = 0;
     let totalResponses = 0;
 
-    const schoolStats: Record<string, { totalScore: number, totalMax: number, count: number, classes: Record<string, { totalScore: number, totalMax: number, count: number }> }> = {};
+    const schoolStats: Record<string, { 
+      totalScore: number, totalMax: number, count: number, 
+      totalScoreP: number, totalMaxP: number, 
+      totalScoreE: number, totalMaxE: number,
+      classes: Record<string, { totalScore: number, totalMax: number, count: number }> 
+    }> = {};
     const scoreDistribution = [
       { name: '0-25%', count: 0 },
       { name: '26-50%', count: 0 },
@@ -58,11 +63,24 @@ export async function GET() {
 
         // School Aggregation
         if (!schoolStats[schoolName]) {
-          schoolStats[schoolName] = { totalScore: 0, totalMax: 0, count: 0, classes: {} };
+          schoolStats[schoolName] = { 
+            totalScore: 0, totalMax: 0, count: 0, 
+            totalScoreP: 0, totalMaxP: 0,
+            totalScoreE: 0, totalMaxE: 0,
+            classes: {} 
+          };
         }
         schoolStats[schoolName].totalScore += r.score;
         schoolStats[schoolName].totalMax += r.max_score;
         schoolStats[schoolName].count++;
+
+        if (r.version === 'P') {
+          schoolStats[schoolName].totalScoreP += r.score;
+          schoolStats[schoolName].totalMaxP += r.max_score;
+        } else if (r.version === 'E') {
+          schoolStats[schoolName].totalScoreE += r.score;
+          schoolStats[schoolName].totalMaxE += r.max_score;
+        }
 
         // Class Aggregation
         if (!schoolStats[schoolName].classes[className]) {
@@ -91,6 +109,12 @@ export async function GET() {
       avg: data.totalMax > 0 ? Math.round((data.totalScore / data.totalMax) * 100) : 0,
       count: data.count
     })).sort((a, b) => b.avg - a.avg);
+
+    const progressData = Object.entries(schoolStats).map(([name, data]) => ({
+      name,
+      poczatkowa: data.totalMaxP > 0 ? Math.round((data.totalScoreP / data.totalMaxP) * 100) : 0,
+      ewaluacyjna: data.totalMaxE > 0 ? Math.round((data.totalScoreE / data.totalMaxE) * 100) : 0,
+    })).sort((a, b) => b.ewaluacyjna - a.ewaluacyjna);
 
     // Flatten classes for leaderboard
     const allClasses: any[] = [];
@@ -123,7 +147,8 @@ export async function GET() {
       schoolsData,
       topClasses,
       scoreDistribution,
-      timelineData
+      timelineData,
+      progressData
     });
 
   } catch (error: any) {
