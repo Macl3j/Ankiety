@@ -65,23 +65,28 @@ ALTER TABLE public.surveys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.responses ENABLE ROW LEVEL SECURITY;
 
--- 7. Polisy RLS (Row Level Security)
+-- 7. Polisy RLS (Row Level Security) z zabezpieczeniem "DROP IF EXISTS" (idempotentność)
 
--- PROFILE ADMINÓW: Tylko zalogowany admin widzi i edytuje swój profil
+-- PROFILE ADMINÓW
+DROP POLICY IF EXISTS "Admini widzą swoje profile" ON public.profiles;
 CREATE POLICY "Admini widzą swoje profile" ON public.profiles
     FOR SELECT TO authenticated USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Admini mogą edytować swoje profile" ON public.profiles;
 CREATE POLICY "Admini mogą edytować swoje profile" ON public.profiles
     FOR UPDATE TO authenticated USING (auth.uid() = id);
 
--- ANKIETY: Publicznie widoczne są tylko opublikowane. Zapis/edycja tylko dla Admina.
+-- ANKIETY
+DROP POLICY IF EXISTS "Każdy widzi opublikowane ankiety" ON public.surveys;
 CREATE POLICY "Każdy widzi opublikowane ankiety" ON public.surveys
     FOR SELECT USING (status = 'PUBLISHED');
 
+DROP POLICY IF EXISTS "Admini mogą robić wszystko z ankietami" ON public.surveys;
 CREATE POLICY "Admini mogą robić wszystko z ankietami" ON public.surveys
     FOR ALL TO authenticated USING (true);
 
--- PYTANIA: Widoczne publicznie, jeśli ankieta jest opublikowana. Zapis/edycja tylko dla Admina.
+-- PYTANIA
+DROP POLICY IF EXISTS "Każdy widzi pytania do opublikowanych ankiet" ON public.questions;
 CREATE POLICY "Każdy widzi pytania do opublikowanych ankiet" ON public.questions
     FOR SELECT USING (
         EXISTS (
@@ -90,17 +95,20 @@ CREATE POLICY "Każdy widzi pytania do opublikowanych ankiet" ON public.question
         )
     );
 
+DROP POLICY IF EXISTS "Admini mogą robić wszystko z pytaniami" ON public.questions;
 CREATE POLICY "Admini mogą robić wszystko z pytaniami" ON public.questions
     FOR ALL TO authenticated USING (true);
 
--- KODY: Odczyt i zapis tylko przez backend (Service Role) lub przez zalogowanego Admina.
--- Blokujemy publiczny odczyt tabeli codes na kliencie z powodów RODO.
+-- KODY
+DROP POLICY IF EXISTS "Admini widzą kody uczniów" ON public.codes;
 CREATE POLICY "Admini widzą kody uczniów" ON public.codes
     FOR ALL TO authenticated USING (true);
 
--- ODPOWIEDZI: Zapis publiczny (przez uczniów). Odczyt tylko dla Admina.
+-- ODPOWIEDZI
+DROP POLICY IF EXISTS "Każdy może wysłać odpowiedź" ON public.responses;
 CREATE POLICY "Każdy może wysłać odpowiedź" ON public.responses
     FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Admini widzą wszystkie odpowiedzi" ON public.responses;
 CREATE POLICY "Admini widzą wszystkie odpowiedzi" ON public.responses
     FOR ALL TO authenticated USING (true);
