@@ -21,7 +21,7 @@ export async function GET() {
 
     // Create a code map for fast lookup
     const codeMap = new Map();
-    codes.forEach(c => codeMap.set(c.code, c));
+    codes.forEach((c: any) => codeMap.set(c.code, c));
 
     // Data structures for aggregation
     let totalScore = 0;
@@ -37,7 +37,7 @@ export async function GET() {
     ];
     const timelineStats: Record<string, { count: number, totalScore: number, totalMax: number }> = {};
 
-    responses.forEach(r => {
+    responses.forEach((r: any) => {
       const student = codeMap.get(r.student_code);
       const schoolName = student?.school || 'Nieznana szkoła';
       const className = student?.class || 'Nieznana klasa';
