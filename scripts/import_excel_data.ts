@@ -28,7 +28,7 @@ function toUUID(strId: string): string {
 async function runImport() {
   const filePath = path.resolve(process.cwd(), 'System Ankiet 2025.xlsx');
   console.log(`Loading Excel file from ${filePath}...`);
-  const workbook = xlsx.readFile(filePath);
+  const workbook = xlsx.readFile(filePath, { cellDates: true });
 
   console.log("--- CLEANING DATABASE ---");
   // Delete all existing responses, questions, surveys, and codes.
