@@ -12,7 +12,8 @@ import {
   Menu, 
   X, 
   Sparkles,
-  Lock
+  Lock,
+  LineChart
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -118,6 +119,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
 
           <Link 
+            href="/admin/analytics" 
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+              pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+            }`}
+          >
+            <LineChart className="w-5 h-5" />
+            <span>Analityka</span>
+          </Link>
+
+          <Link 
             href="/admin/codes" 
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
               pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
@@ -178,6 +189,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <ClipboardList className="w-5 h-5" />
                 <span>Zarządzaj Ankietami</span>
+              </Link>
+
+              <Link 
+                href="/admin/analytics" 
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                  pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                }`}
+              >
+                <LineChart className="w-5 h-5" />
+                <span>Analityka</span>
               </Link>
 
               <Link 
