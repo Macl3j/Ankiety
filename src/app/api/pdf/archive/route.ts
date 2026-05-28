@@ -58,6 +58,13 @@ export async function GET(request: Request) {
       });
     }
 
+    // Helper to remove emojis and other characters that might crash pdf-lib font encoding
+    const sanitizeText = (text: any) => {
+      if (!text) return '';
+      // allow typical latin characters, numbers, punctuation
+      return String(text).replace(/[^\x20-\x7E\xA0-\xFF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF\u2000-\u206F]/g, '');
+    };
+
     // 3. Budowanie listy odpowiedzi w formacie dla PDF
     const answersList = questions.map((q: any, i: number) => {
       let ans = response.answers[q.id] || '';
@@ -66,8 +73,8 @@ export async function GET(request: Request) {
       }
       return {
         nr: i + 1,
-        question: q.text,
-        answer: ans.toString()
+        question: sanitizeText(q.text),
+        answer: sanitizeText(ans.toString())
       };
     });
 
@@ -76,13 +83,13 @@ export async function GET(request: Request) {
     // 4. Generujemy strumień PDF z szablonu Reactowego
     const stream = await renderToStream(
       React.createElement(SurveyArchiveTemplate, {
-        studentName: `${studentInfo.first_name} ${studentInfo.last_name}`,
-        studentCode: response.student_code,
-        school: studentInfo.school,
-        studentClass: studentInfo.class,
-        dateStr,
+        studentName: sanitizeText(`${studentInfo.first_name} ${studentInfo.last_name}`),
+        studentCode: sanitizeText(response.student_code),
+        school: sanitizeText(studentInfo.school),
+        studentClass: sanitizeText(studentInfo.class),
+        dateStr: sanitizeText(dateStr),
         consent: response.consent,
-        surveyTitle: surveyInfo.title,
+        surveyTitle: sanitizeText(surveyInfo.title),
         taskId: response.task_id,
         version: response.version,
         answersList,

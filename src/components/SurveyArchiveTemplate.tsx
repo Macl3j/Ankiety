@@ -103,13 +103,16 @@ const styles = StyleSheet.create({
   tableCellHeader: {
     fontWeight: 'bold',
     fontSize: 10,
+    fontFamily: 'Roboto',
   },
   tableCell: {
     fontSize: 10,
+    fontFamily: 'Roboto',
   },
   tableCellBold: {
     fontSize: 10,
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
   }
 });
 
