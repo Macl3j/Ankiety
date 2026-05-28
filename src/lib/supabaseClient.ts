@@ -18,13 +18,12 @@ export const supabase = createClient(
 );
 
 // 2. Prywatny klient Admin (używany wyłącznie po stronie serwera API do pomijania RLS - np. walidacja kodów)
-export const supabaseAdmin = createClient(
-  supabaseUrl || '',
-  supabaseServiceKey || '',
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  }
-);
+// Inicjalizujemy go bezpiecznie tylko na serwerze (gdzie SUPABASE_SERVICE_ROLE_KEY jest dostępny)
+export const supabaseAdmin = (supabaseUrl && supabaseServiceKey)
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    })
+  : null as any;
