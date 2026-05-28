@@ -1,0 +1,190 @@
+{
+  "Codes": [
+    {
+      "Code": 123456,
+      "FirstName": "jak",
+      "LastName": "kowalski",
+      "School": "gniezno",
+      "Class": "5a",
+      "CreatedDate": "2026-02-16 17:29:33.570"
+    },
+    {
+      "Code": 333333,
+      "FirstName": "Jan",
+      "LastName": "KOwalska",
+      "School": "Gniezno1",
+      "Class": "5b",
+      "CreatedDate": "2026-02-17 00:55:23.388"
+    },
+    {
+      "Code": 222222,
+      "FirstName": "Jan",
+      "LastName": "Kowalski",
+      "School": "Gniezno1",
+      "Class": "5b",
+      "CreatedDate": "2026-02-17 08:09:50.536"
+    }
+  ],
+  "Settings": [
+    {
+      "Key": "ROOT_FOLDER_ID",
+      "Value": "1UhXIgFZez4YHHA3BTZrgXEM7p0TfsJXL",
+      "Description": "ID głównego folderu na Dysku Google (Wypełni się automatycznie)"
+    },
+    {
+      "Key": "ARCHIVE_FOLDER_ID",
+      "Value": "1E3jwAuIau3EMkyvnCp-DevCKs4n2D1Tx",
+      "Description": "ID folderu Archiwum (Wypełni się automatycznie)"
+    },
+    {
+      "Key": "ANONYMOUS_MODE",
+      "Value": false,
+      "Description": "Czy pozwalać na anonimowe ankiety? (true/false)"
+    }
+  ],
+  "Surveys": [
+    {
+      "SurveyID": "t1_k2_p",
+      "TaskID": 1,
+      "Title": "Ankieta Początkowa - Klasa 2",
+      "TargetGroup": "Klasa 2",
+      "Version": "P",
+      "Status": "PUBLISHED",
+      "CreatedAt": "2026-02-13 13:51:12.555",
+      "UpdatedAt": "2026-04-24 12:40:07.924",
+      "IsFixedTask1": true,
+      "DefinitionJSON": "[{\"id\":\"q_1771776018785_0\",\"options\":[{\"image\":\"https://lh3.googleusercontent.com/d/1jmhKGMOPZ9IRn92WfSakGZ2x1Ds0Zn9S\",\"correct\":false,\"text\":\"Samego silnika\"},{\"image\":\"https://lh3.googleusercontent.com/d/1ENrYvDYVublmAhsiQvk0O8DiGC7A1L0J\",\"correct\":false,\"text\":\"Oświetlenia, bloków ikon\"},{\"image\":\"https://lh3.googleusercontent.com/d/19T7ATCbE8l5pcVAS6otn7qRQBi0cIlAg\",\"correct\":true,\"text\":\"Silnika, bloków ikon\"},{\"text\":\"Nie wiem, ale chętnie się dowiem\",\"correct\":false}],\"order\":1,\"weight\":1,\"image\":\"https://lh3.googleusercontent.com/d/1X3LvRc9leDnIE_plpxtqJeg0BIa4tGJz\",\"text\":\"Za pomocą jakich elementów możesz wprawić model wykonany z klocków LEGO w ruch?\",\"type\":\"SINGLE\"},{\"type\":\"SINGLE\",\"text\":\"Co jest najważniejsze, aby robot bezbłędnie dotarł do celu?\",\"order\":2,\"weight\":1,\"image\":\"\",\"id\":\"q_1771776018785_1\",\"options\":[{\"text\":\"Aby robot miał w pełni naładowaną baterię i ładne kolory światełek.\",\"correct\":false},{\"text\":\"Dokładne zaplanowanie każdego kroku i sprawdzenie drogi na macie przed startem.\",\"correct\":true},{\"text\":\"Jak najszybsze naciskanie przycisków lub układanie kart, żeby robot ruszył pierwszy.\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem\",\"correct\":false}]},{\"id\":\"q_1771776018785_2\",\"options\":[{\"image\":\"https://lh3.googleusercontent.com/d/10N6vvjjrm6UYCwlDX3uz2J3hnk3VCij2\",\"correct\":true,\"text\":\"Trasa 1\"},{\"image\":\"https://lh3.googleusercontent.com/d/1fwJ7aBBdyI6pu-XJYKeUSNBOBpjGRif7\",\"correct\":false,\"text\":\"Trasa 2\"},{\"image\":\"https://lh3.googleusercontent.com/d/11uK_FBH8QR0JMJ7oZ10afCyWFc8THPO3\",\"correct\":false,\"text\":\"Trasa 3\"},{\"text\":\"Nie wiem, ale chętnie się dowiem\",\"correct\":false}],\"weight\":1,\"image\":\"https://lh3.googleusercontent.com/d/1AZGJwXrElk_wZ5e5DJG5439gq_rbwtrY\",\"order\":3,\"text\":\"Jak powinien poruszać się robot, żeby dojechał najkrótszą drogą z punktu A do punktu B? Wybierz właściwą odpowiedź.\",\"type\":\"SINGLE\"},{\"order\":4,\"image\":\"\",\"weight\":1,\"options\":[{\"text\":\"Wyłączyć robota i powiedzieć, że się zepsuł lub nie działa.\",\"correct\":false},{\"text\":\"Na spokojnie sprawdzić polecenia krok po kroku i poprawić ten fragment, który był błędny.\",\"correct\":true},{\"text\":\"Naciskać wszystkie przyciski po kolei, aż w końcu uda mu się trafić w dobre miejsce.\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"id\":\"new_1776341710787\",\"type\":\"SINGLE\",\"text\":\"Co najlepiej zrobić, gdy robot pomylił drogę i nie dojechał tam, gdzie miał dojechać?\"},{\"text\":\"Jakie przedmioty możesz zrobić za pomocą długopisu 3D?\",\"type\":\"SINGLE\",\"id\":\"new_1773041037378\",\"options\":[{\"correct\":false,\"text\":\"Urządzenia elektryczne, np. pralkę\",\"image\":\"https://lh3.googleusercontent.com/d/1lKTnYe4NfmgOLClGYwov3GPaTLToeTZ8\"},{\"image\":\"https://lh3.googleusercontent.com/d/1ZlRJFPkfOYXVjJkYp5-5YX8gy5Gsj_Tz\",\"correct\":true,\"text\":\"Ozdoby i dekoracje\"},{\"image\":\"https://lh3.googleusercontent.com/d/1tKPsSNxBHk-XTN_L8QBGWnqiBJJd3dir\",\"correct\":false,\"text\":\"Drewniane zabawki\"},{\"text\":\"Nie wiem, chętnie się dowiem\",\"correct\":false}],\"order\":5,\"weight\":1,\"image\":\"\"},{\"text\":\"Ile najwięcej urządzeń można podłączyć do mózgu Hub Essential?\",\"type\":\"SINGLE\",\"options\":[{\"text\":\"4\",\"correct\":false},{\"text\":\"3\",\"correct\":false},{\"text\":\"2\",\"correct\":true},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"id\":\"new_1773041171730\",\"order\":6,\"image\":\"https://lh3.googleusercontent.com/d/1r_Gji2Tdmur2pXrp8DcIe4niQR6l7Vip\",\"weight\":1},{\"text\":\"Co można zamontować do Geni Bota, by rysował figury geometryczne?\",\"type\":\"SINGLE\",\"options\":[{\"text\":\"Pisak\",\"correct\":true},{\"text\":\"Pędzel\",\"correct\":false},{\"text\":\"Linijkę\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"id\":\"new_1773041332976\",\"order\":7,\"image\":\"https://lh3.googleusercontent.com/d/11dhj_5iw5RPdBUtqogm-IHdLlqbJabj4\",\"weight\":1},{\"type\":\"SINGLE\",\"text\":\"Kiedy możesz podać obcej osobie swoje hasło?\",\"order\":8,\"image\":\"https://lh3.googleusercontent.com/d/1peyvBEyu1vXlkMlotP5JBpGk3jRISYZS\",\"weight\":1,\"options\":[{\"text\":\"Kiedy ktoś cię o to poprosi.\",\"correct\":false},{\"text\":\"Kiedy znajdziesz fajną grę online.\",\"correct\":false},{\"text\":\"Nie wolno nikomu oprócz rodziców podawać swojego hasła.\",\"correct\":true},{\"text\":\"Kiedy masz dużo kolegów i koleżanek w Internecie.\",\"correct\":false}],\"id\":\"new_1773041386016\"},{\"id\":\"new_1773046146609\",\"options\":[{\"text\":\"Współpracy z koleżankami i kolegami\",\"correct\":false},{\"text\":\"Samodzielności\",\"correct\":false},{\"text\":\"Programowania na komputerze i tablecie\",\"correct\":false},{\"text\":\"Odkrywać swoje talenty\",\"correct\":false}],\"weight\":1,\"image\":\"\",\"order\":9,\"text\":\"Czego chcesz się nauczyć na zajęciach w Stolicy Experymentu?\",\"type\":\"MULTI\"}]"
+    },
+    {
+      "SurveyID": "t1_k5_p",
+      "TaskID": 1,
+      "Title": "Ankieta Początkowa - Klasa 5",
+      "TargetGroup": "Klasa 5",
+      "Version": "P",
+      "Status": "PUBLISHED",
+      "CreatedAt": "2026-02-13 13:51:12.917",
+      "UpdatedAt": "2026-04-16 15:53:11.308",
+      "IsFixedTask1": true,
+      "DefinitionJSON": "[{\"weight\":1,\"image\":\"https://lh3.googleusercontent.com/d/1Us87rmhx6cVoh8y3ipUdx0cEfgOGNBpY\",\"type\":\"SINGLE\",\"options\":[{\"text\":\"Stop Motion Studio, Dragonframe\",\"image\":\"https://lh3.googleusercontent.com/d/1iptkgn0MGdcsNRn6PUvDWXqVIKR13qzq\",\"correct\":true},{\"correct\":false,\"text\":\"PowerPoint\"},{\"correct\":false,\"text\":\"Paint, Outlook\"},{\"correct\":false,\"text\":\"YouTube\"},{\"correct\":false,\"image\":null,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"required\":true,\"text\":\"W jakiej aplikacji można stworzyć film poklatkowy?\",\"id\":\"q_1771776025574_0\",\"order\":1},{\"options\":[{\"text\":\"Standardowo film poklatkowy powinien mieć minimum 25 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 25 zdjęć.\",\"correct\":false},{\"text\":\"Standardowo film poklatkowy powinien mieć minimum 30 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 30 zdjęć.\",\"correct\":false},{\"correct\":true,\"text\":\"Standardowo film poklatkowy powinien mieć minimum 5 klatek na sekundę - oznacza to, że na  jedną sekundę filmu potrzebne jest 5 zdjęć.\"},{\"correct\":false,\"text\":\"Standardowo film poklatkowy powinien mieć minimum 60 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 60 zdjęć.\"},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"required\":true,\"order\":2,\"id\":\"q_1771776025574_1\",\"text\":\"Ile klatek potrzebujesz, by stworzyć 1 sekundę filmu poklatkowego?\",\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/1qtOHJKu--zKQij0-jU848TN8J0awsgU6\",\"weight\":1},{\"weight\":1,\"image\":\"\",\"type\":\"SINGLE\",\"id\":\"q_1771776025574_4\",\"text\":\"Co jest najważniejsze podczas nagrywania filmów, w tym tworzenia filmu poklatkowego?\",\"order\":3,\"options\":[{\"text\":\"Dobrze wykonane czarno-białe zdjęcia.\",\"correct\":false},{\"text\":\"Stabilizacja urządzenia, którym robione są zdjęcia, nagrywany jest film.\",\"correct\":true},{\"correct\":false,\"text\":\"Zmieniające się światło.\"},{\"correct\":false,\"text\":\"Unikanie głosu i dźwięków.\"},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"required\":true},{\"image\":\"https://lh3.googleusercontent.com/d/1cs9ac-r7IE6KO15HhEr5opSKyJ1NpDRN\",\"type\":\"SINGLE\",\"weight\":1,\"options\":[{\"text\":\"4\",\"correct\":false},{\"correct\":true,\"text\":\"6\"},{\"correct\":false,\"text\":\"5\"},{\"text\":\"3\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"required\":true,\"id\":\"q_1771776025574_5\",\"text\":\"Ile urządzeń maksymalnie można podłączyć do Hub Prime?\",\"order\":4},{\"weight\":1,\"image\":\"https://lh3.googleusercontent.com/d/1uei0ovvbIYTn5GtKjW_zO-pDK69emWta\",\"type\":\"SINGLE\",\"text\":\"Które z poniższych bloków kodów w Scratchu są Ci znane?\",\"id\":\"q_1771776025574_7\",\"order\":5,\"options\":[{\"text\":\"Bloki ruchu (np. “przesuń o 10 kroków”), bloki wyglądu (np. “zmień kostium na”), bloki zdarzeń (np. “kiedy kliknięto zieloną flagę”).\",\"correct\":true},{\"text\":\"Bloki przestrzeni 3D (np. \\\"ustaw przestrzeń na\\\"), bloki zdarzeń (np. “kiedy kliknięto zieloną flagę”), bloki zasilania (np. \\\"ustaw zasilanie max\\\").\",\"correct\":false},{\"text\":\"Bloki zasilania (np. \\\"ustaw zasilanie max\\\"), bloki dźwięku (np. “zagraj dźwięk”), bloki zdarzeń (np. “kiedy kliknięto zieloną flagę”).\",\"correct\":false},{\"correct\":false,\"text\":\"Bloki dźwięku (np. “zagraj dźwięk”), bloki czujników (np. “jeśli dotyka koloru”), bloki rozszerzenia (np. \\\"ustaw wtyczkę na wartość ...\\\").\"},{\"correct\":false,\"text\":\"Nie znam, ale chętnie poznam.\"}],\"required\":true},{\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/1rlkl_Ot8n3jl_Y1a-GON3wzpn9j2tTmK\",\"weight\":1,\"required\":true,\"options\":[{\"text\":\"Długopisu\",\"correct\":false},{\"correct\":false,\"text\":\"Ołówka\"},{\"text\":\"Kart\",\"correct\":true},{\"correct\":false,\"text\":\"Kostek\"},{\"correct\":false,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"order\":6,\"text\":\"Za pomocą czego można kodować roboty typu Genibot?\",\"id\":\"q_1771776025574_8\"},{\"weight\":1,\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/1gEph4gcS8bzo_LG-4TdNYFKuT8yggb5T\",\"order\":7,\"text\":\"Jak powinien poruszać się robot, żeby dojechał do celu po wyznaczonej drodze? Wybierz właściwą odpowiedź.\",\"id\":\"q_1771776025574_9\",\"required\":true,\"options\":[{\"correct\":false,\"image\":\"https://lh3.googleusercontent.com/d/1htm1n6_BSD5Yx9UpIO8mZXSxwNZatop6\",\"text\":\"Trasa 1\"},{\"text\":\"Trasa 2\",\"image\":\"https://lh3.googleusercontent.com/d/1BVX8YpJ_QiA8SXATaWA5t-OKaDxA53Bi\",\"correct\":false},{\"text\":\"Trasa 3\",\"image\":\"https://lh3.googleusercontent.com/d/1Dan-j4LjlkLz6DPKYyBDCEXaIXjd90KU\",\"correct\":true},{\"text\":\"Nie wiem, chętnie się dowiem.\",\"correct\":false}]},{\"weight\":1,\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/1GcnXEza0eAEYakLzme1SUExnJ47DTN4h\",\"order\":8,\"id\":\"q_1771776025574_10\",\"text\":\"W jaki sposób robot może nauczyć się odróżniać jabłko od banana podczas np. robienia zakupów?\",\"options\":[{\"text\":\"Robot ma wgraną encyklopedię wszystkich owoców świata w swojej pamięci.\",\"correct\":false},{\"correct\":true,\"text\":\"Możemy pokazać mu wiele zdjęć jabłek i bananów, a on zapamięta ich cechy (kształt, kolor).\"},{\"correct\":false,\"text\":\"Robot sam \\\"widzi\\\" i \\\"rozumie\\\" świat tak samo jak człowiek, bo ma wbudowane oczy.\"},{\"text\":\"To był przypadek – robot zgaduje, co widzi, i czasem mu się udaje.\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"required\":true},{\"required\":true,\"options\":[{\"text\":\"Stabilność, aby elementy do siebie pasowały i konstrukcja była spójna.\",\"correct\":true},{\"correct\":false,\"text\":\"Podpory powinny być jak najwyższe i jak najcieńsze, żeby most wyglądał lekko.\"},{\"correct\":false,\"text\":\"Elastyczność, elementy nie muszą być ze sobą mocno połączone.\"},{\"text\":\"Wysokość - musi mieć co najmniej 15 cm wysokości.\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"order\":9,\"text\":\"Wyobraź sobie, że Twój most musi wytrzymać silny podmuch wiatru lub przejazd ciężkiego auta. O czym musisz pamiętać, projektując konstrukcję, aby most nie chwiał się i nie zawalił?\",\"id\":\"new_1773045799186\",\"weight\":1,\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/1pt42eTjX-H-JxFujx7sR8PM6tVSzYCtE\"},{\"order\":10,\"id\":\"q_1771776025574_11\",\"text\":\"Co jest najważniejszym składnikiem filamentu PLA do długopisu 3D?\",\"required\":true,\"options\":[{\"correct\":false,\"text\":\"Tworzywo ABS.\"},{\"correct\":false,\"text\":\"Mąka ziemniaczana lub trzcina cukrowa.\"},{\"correct\":true,\"text\":\"Mączka kukurydziana.\"},{\"text\":\"Polietylen.\",\"correct\":false},{\"correct\":false,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/1tDcFoKXUBSj81qjjZA7iL97VN9z5cA2K\",\"weight\":1},{\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/10YAZSg9y7juxigCbI9xEm6GNaqKBM2lM\",\"weight\":1,\"required\":true,\"options\":[{\"text\":\"Używać tego samego hasła na wszystkich stronach.\",\"correct\":false},{\"text\":\"Udostępniać hasła znajomym w razie potrzeby.\",\"correct\":false},{\"correct\":false,\"text\":\"Nie wiem czym jest ochrona swoich danych w Internecie.\"},{\"correct\":true,\"text\":\"Tworzyć silne, unikalne hasła i rozważyć korzystanie z menedżera haseł.\"},{\"correct\":false,\"text\":\"Używać prostych haseł, aby łatwo je zapamiętać.\"}],\"order\":11,\"id\":\"q_1771776025574_12\",\"text\":\"Co należy zrobić, aby zapewnić bezpieczeństwo swoich haseł w internecie?\"},{\"options\":[{\"text\":\"Pracować samodzielnie i z innymi.\",\"correct\":false},{\"text\":\"Rozumieć i tworzyć informacje.\",\"correct\":false},{\"correct\":false,\"text\":\"Realizować nowe pomysły i projekty.\"},{\"correct\":false,\"text\":\"Korzystać z technologii.\"},{\"text\":\"Współpracować z innymi i być ważną osobą w zespole.\",\"correct\":false}],\"id\":\"q_1771776025574_13\",\"text\":\"Czego chcesz się nauczyć na zajęciach w Stolicy eXperymentu?\",\"order\":12,\"weight\":1,\"image\":\"\",\"type\":\"MULTI\"}]"
+    },
+    {
+      "SurveyID": "t1_k7_p",
+      "TaskID": 1,
+      "Title": "Ankieta Początkowa - Klasa 7",
+      "TargetGroup": "Klasa 7",
+      "Version": "P",
+      "Status": "PUBLISHED",
+      "CreatedAt": "2026-02-13 13:51:13.386",
+      "UpdatedAt": "2026-05-28 10:51:24.866",
+      "IsFixedTask1": true,
+      "DefinitionJSON": "[{\"id\":\"q_1771776029061_0\",\"image\":\"https://lh3.googleusercontent.com/d/12ORLwlMs5KPeAFyZrG8MrPXLA7hAbsse\",\"type\":\"SINGLE\",\"options\":[{\"correct\":true,\"text\":\"Stop Motion Studio, Dragonframe\"},{\"text\":\"PowerPoint\",\"correct\":false},{\"correct\":false,\"text\":\"Paint, Outlook\"},{\"correct\":false,\"text\":\"YouTube\"},{\"text\":\"Tinkercad\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"order\":1,\"text\":\"W jakiej aplikacji można stworzyć film poklatkowy?\",\"weight\":1},{\"image\":\"https://lh3.googleusercontent.com/d/1K86t5UWfbaTu24AlpGXUImq9AnNGBT6i\",\"id\":\"q_1771776029061_1\",\"type\":\"SINGLE\",\"options\":[{\"correct\":false,\"text\":\"Standardowo film poklatkowy powinien mieć minimum 240 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 240 zdjęć.\"},{\"correct\":false,\"text\":\"Standardowo film poklatkowy powinien mieć minimum 50 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 25 zdjęć.\"},{\"correct\":true,\"text\":\"Standardowo film poklatkowy powinien mieć minimum 5 klatek na sekundę - oznacza to, że na  jedną sekundę filmu potrzebne jest 5 zdjęć.\"},{\"text\":\"Standardowo film poklatkowy powinien mieć minimum 60 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 30 zdjęć.\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"weight\":1,\"text\":\"Ile klatek potrzebujesz, by stworzyć 1 sekundę filmu poklatkowego?\",\"order\":2},{\"options\":[{\"correct\":false,\"text\":\"Dobrze wykonane czarno-białe zdjęcia.\"},{\"correct\":false,\"text\":\"Wykonywanie zdjęć w nieregularnych odstępach czasu.\"},{\"text\":\"Stabilność urządzenia, którym robione są zdjęcia.\",\"correct\":true},{\"correct\":false,\"text\":\"Zmieniające się światło i nagrywanie w trybie automatycznym.\"},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"weight\":1,\"text\":\"Co jest najważniejsze podczas tworzenia filmu poklatkowego:\",\"order\":3,\"image\":\"\",\"id\":\"q_1771776029061_2\",\"type\":\"SINGLE\"},{\"options\":[{\"correct\":false,\"text\":\"3\"},{\"correct\":false,\"text\":\"4\"},{\"text\":\"5\",\"correct\":false},{\"text\":\"6\",\"correct\":true},{\"correct\":false,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"text\":\"Ile urządzeń maksymalnie można podłączyć do Hub Prime?\",\"order\":4,\"weight\":1,\"image\":\"https://lh3.googleusercontent.com/d/14m_kubXffvasd8cygUUXOs7UhBzUWVkj\",\"id\":\"q_1771776029061_3\",\"type\":\"SINGLE\"},{\"image\":\"https://lh3.googleusercontent.com/d/1w39UAYQSMd8_6qYmnnUbpisgW423-fxw\",\"id\":\"q_1771776029061_17\",\"type\":\"SINGLE\",\"options\":[{\"correct\":true,\"text\":\"Czujnik temperatury i światła.\"},{\"text\":\"Moduł do obsługi kart graficznych.\",\"correct\":false},{\"text\":\"Moduł do sterowania drukarkami atramentowymi.\",\"correct\":false},{\"text\":\"Zestaw do programowania aplikacji mobilnych.\",\"correct\":false},{\"correct\":false,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"order\":5,\"text\":\"Który z poniższych elementów można podłączyć do płytki Arduino?\",\"weight\":1},{\"image\":\"https://lh3.googleusercontent.com/d/1Il8cAZ18TWIy6NC1MSll7ImQZwMOfPyh\",\"id\":\"q_1771776029061_5\",\"type\":\"SINGLE\",\"options\":[{\"correct\":false,\"text\":\"Czujnika odległości i czujnika światła.\"},{\"text\":\"Akcelerometru (czujnika przeciążeń) i czujnika dotyku.\",\"correct\":true},{\"text\":\"Wyłącznie czujnika podczerwieni do wykrywania przeszkód.\",\"correct\":false},{\"correct\":false,\"text\":\"Photona nie da się zaprogramować tak, aby reagował na podnoszenie.\"},{\"correct\":false,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"weight\":1,\"order\":6,\"text\":\"Tworzysz program dla robota typu Photon, który ma pełnić rolę „strażnika”. Robot powinien stać w miejscu i zacząć świecić na czerwono oraz wydawać dźwięk alarmu tylko wtedy, gdy ktoś go podniesie lub przesunie. Jakich czujników musisz użyć w instrukcji warunkowej?\"},{\"options\":[{\"correct\":false,\"text\":\"Współrzędna X.\"},{\"text\":\"Współrzędna Z.\",\"correct\":false},{\"text\":\"Współrzędna Y.\",\"correct\":true},{\"correct\":false,\"text\":\"W Minecrafcie nie ma współrzędnych, używa się tylko kierunków „lewo/prawo” oraz ruch myszą.\"},{\"correct\":false,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"order\":7,\"text\":\"Planujesz przenieść się w miejsce, gdzie zaczniesz budować fundament domu. Która współrzędna odpowiada za wysokość (pion), aby nie zacząć budować w powietrzu lub pod ziemią?\",\"weight\":1,\"image\":\"https://lh3.googleusercontent.com/d/1ekgUVjJAQBaFar6Ia5famsxrnQPIHYjg\",\"id\":\"new_1776350745421\",\"type\":\"SINGLE\"},{\"image\":\"https://lh3.googleusercontent.com/d/1posdhaPaaPcPC0Xp46SbXkxvKLU21-j2\",\"id\":\"new_1773048725043\",\"type\":\"SINGLE\",\"options\":[{\"image\":\"https://lh3.googleusercontent.com/d/1bcwq_9ZZV0BfPtSJIm_D2IIJxmfhztnj\",\"correct\":false,\"text\":\"Trasa 1\"},{\"correct\":false,\"text\":\"Trasa 2\",\"image\":\"https://lh3.googleusercontent.com/d/11gESvZohRaC4Rd0szHGfiUj32V1z3TNj\"},{\"correct\":true,\"text\":\"Trasa 3\",\"image\":\"https://lh3.googleusercontent.com/d/1Be3iu-eXk9vJ4xBfk1D5WB2iiDYCWBjB\"},{\"text\":\"Nie wiem, chętnie się dowiem\",\"correct\":false}],\"weight\":1,\"order\":8,\"text\":\"Jak powinien poruszać się robot, żeby dojechał najkrótszą do celu? Wybierz właściwą odpowiedź.\"},{\"image\":\"https://lh3.googleusercontent.com/d/1scP_RXrXY59d_OhQ6XWg8SgMXaK7gqme\",\"id\":\"new_1773048795332\",\"type\":\"SINGLE\",\"options\":[{\"text\":\"Programowalna płytka Arduino z nakładką I/O.\",\"correct\":false},{\"text\":\"Czujniki i moduły elektroniczne do realizacji projektów.\",\"correct\":false},{\"correct\":false,\"text\":\"Aplikacja edukacyjna z kursem programowania.\"},{\"correct\":true,\"text\":\"Moduły do integracji z drukarkami 3D.\"},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"order\":9,\"text\":\"Który z poniższych elementów NIE jest częścią zestawu BeCreo?\",\"weight\":1},{\"options\":[{\"text\":\"Akcelerometr: Wykrywa ruch i orientację płytki, 2 przyciski, oznaczone A i B.\",\"correct\":true},{\"correct\":false,\"text\":\"Czujnik natężenia dźwięku, port USB typu A.\"},{\"correct\":false,\"text\":\"2 przyciski, oznaczone X i Y, port USB typu C.\"},{\"text\":\"Port USB typu C, kolorowe diody LED.\",\"correct\":false},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}],\"order\":10,\"text\":\"Które z wbudowanych czujników/elementów ma wbudowany mikrokontroler Micro:bit?\",\"weight\":1,\"image\":\"https://lh3.googleusercontent.com/d/1psMabyCxbdxgN6I1vY1U3f6aI7Y0gS55\",\"id\":\"new_1773048879270\",\"type\":\"SINGLE\"},{\"image\":\"https://lh3.googleusercontent.com/d/11mZbjvAWKTxirj4DawJpdvsQOAB50D4c\",\"id\":\"new_1773048928903\",\"type\":\"SINGLE\",\"options\":[{\"text\":\"Tworzywo ABS.\",\"correct\":false},{\"correct\":false,\"text\":\"Mąka ziemniaczana lub trzcina cukrowa.\"},{\"correct\":true,\"text\":\"Mączka kukurydziana.\"},{\"correct\":false,\"text\":\"Polietylen.\"},{\"correct\":false,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}],\"weight\":1,\"order\":11,\"text\":\"Co jest najważniejszym składnikiem filamentu PLA do drukarki 3D?\"},{\"order\":12,\"text\":\"Które z poniższych działań najlepiej chroni Twoje dane osobowe w internecie?\",\"weight\":1,\"options\":[{\"text\":\"Korzystanie z zaawansowanych funkcji przeglądarek internetowych.\",\"correct\":false},{\"text\":\"Wybieranie metod dostępu zgodnych z najnowszymi trendami technologicznymi.\",\"correct\":false},{\"correct\":false,\"text\":\"Implementacja wielowarstwowych rozwiązań ochronnych w dostępie do kont online.\"},{\"correct\":false,\"text\":\"Optymalizacja ustawień urządzeń mobilnych w zakresie dostępu do danych.\"},{\"correct\":false,\"text\":\"Regularne sprawdzanie raportów aktywności kont.\"},{\"text\":\"Nie wiem czym jest ochrona moich danych w Internecie\",\"correct\":false}],\"type\":\"SINGLE\",\"image\":\"https://lh3.googleusercontent.com/d/1uLz3esbs_jTgyw2A6gJeBshDRXHlN9dL\",\"id\":\"new_1773049006655\"},{\"image\":\"\",\"id\":\"new_1773049072024\",\"type\":\"MULTI\",\"options\":[{\"text\":\"Rozumieć i tworzyć informacje.\",\"correct\":false},{\"correct\":false,\"text\":\"Pracować samodzielnie i z innymi.\"},{\"correct\":false,\"text\":\"Rozwiązywać problemy matematyczne.\"},{\"text\":\"Korzystać z komputera i nowoczesnych aplikacji.\",\"correct\":false},{\"correct\":false,\"text\":\"Współpracować z innymi i być ważną osobą w zespole.\"},{\"text\":\"Realizować nowe pomysły i projekty.\",\"correct\":false}],\"weight\":1,\"order\":13,\"text\":\"Czego chcesz się nauczyć na zajęciach w Stolicy eXperymentu?\"}]"
+    }
+  ],
+  "Questions": [
+    {
+      "QuestionID": "q_1771776025574_0",
+      "SurveyID": "t1_k5_p",
+      "Type": "SINGLE",
+      "Text": "W jakiej aplikacji można stworzyć film poklatkowy?",
+      "OptionsJSON": "[{\"text\":\"Stop Motion Studio, Dragonframe\",\"image\":\"https://lh3.googleusercontent.com/d/1iptkgn0MGdcsNRn6PUvDWXqVIKR13qzq\",\"correct\":true},{\"correct\":false,\"text\":\"PowerPoint\"},{\"correct\":false,\"text\":\"Paint, Outlook\"},{\"correct\":false,\"text\":\"YouTube\"},{\"correct\":false,\"image\":null,\"text\":\"Nie wiem, ale chętnie się dowiem.\"}]",
+      "Order": 1,
+      "Weight": 1,
+      "Unnamed: 7": "https://lh3.googleusercontent.com/d/1Us87rmhx6cVoh8y3ipUdx0cEfgOGNBpY"
+    },
+    {
+      "QuestionID": "q_1771776025574_1",
+      "SurveyID": "t1_k5_p",
+      "Type": "SINGLE",
+      "Text": "Ile klatek potrzebujesz, by stworzyć 1 sekundę filmu poklatkowego?",
+      "OptionsJSON": "[{\"text\":\"Standardowo film poklatkowy powinien mieć minimum 25 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 25 zdjęć.\",\"correct\":false},{\"text\":\"Standardowo film poklatkowy powinien mieć minimum 30 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 30 zdjęć.\",\"correct\":false},{\"correct\":true,\"text\":\"Standardowo film poklatkowy powinien mieć minimum 5 klatek na sekundę - oznacza to, że na  jedną sekundę filmu potrzebne jest 5 zdjęć.\"},{\"correct\":false,\"text\":\"Standardowo film poklatkowy powinien mieć minimum 60 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 60 zdjęć.\"},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}]",
+      "Order": 2,
+      "Weight": 1,
+      "Unnamed: 7": "https://lh3.googleusercontent.com/d/1qtOHJKu--zKQij0-jU848TN8J0awsgU6"
+    },
+    {
+      "QuestionID": "q_1771776025574_4",
+      "SurveyID": "t1_k5_p",
+      "Type": "SINGLE",
+      "Text": "Co jest najważniejsze podczas nagrywania filmów, w tym tworzenia filmu poklatkowego?",
+      "OptionsJSON": "[{\"text\":\"Dobrze wykonane czarno-białe zdjęcia.\",\"correct\":false},{\"text\":\"Stabilizacja urządzenia, którym robione są zdjęcia, nagrywany jest film.\",\"correct\":true},{\"correct\":false,\"text\":\"Zmieniające się światło.\"},{\"correct\":false,\"text\":\"Unikanie głosu i dźwięków.\"},{\"text\":\"Nie wiem, ale chętnie się dowiem.\",\"correct\":false}]",
+      "Order": 3,
+      "Weight": 1,
+      "Unnamed: 7": NaN
+    }
+  ],
+  "Responses": [
+    {
+      "ResponseID": "r_1771259378885",
+      "SurveyID": "t1_k2_p",
+      "TaskID": 1,
+      "Version": "P",
+      "RespondentID": 123456,
+      "Timestamp": "2026-02-16 17:29:38.885",
+      "AnswersJSON": "{\"q_1770991090694_2\":null,\"q_1770991090694_13\":[],\"q_1770991090694_3\":null,\"q_1770991090694_5\":null,\"q_1770991090694_6\":null,\"q_1770991088795_1\":null,\"q_1770991084951_2\":null,\"q_1770991090694_10\":null,\"q_1770991090694_4\":null,\"q_1770991090694_0\":null,\"q_1770991088795_0\":null,\"q_1770991090694_7\":[],\"q_1770991088795_2\":null,\"q_1770991084951_1\":\"Tak, mam własny\",\"q_1770991090694_8\":null,\"q_1770991084951_0\":4,\"q_1770991090694_12\":null,\"q_1770991090694_1\":null,\"q_1770991090694_9\":null,\"q_1770991090694_11\":null}",
+      "Score": 0,
+      "ConsentRODO": true,
+      "CertificatePdfId": "1dW6JwCJMNvexDg5ppVGoA6opTBCz2XWs",
+      "DefinitionSnapshotID": NaN
+    },
+    {
+      "ResponseID": "r_1771260167849",
+      "SurveyID": "t1_k2_e",
+      "TaskID": 1,
+      "Version": "E",
+      "RespondentID": 123456,
+      "Timestamp": "2026-02-16 17:42:47.849",
+      "AnswersJSON": "{\"q_1770991090694_3\":null,\"q_1770991090694_13\":[],\"q_1770991090694_11\":null,\"q_1770991084951_0\":4,\"q_1770991090694_12\":null,\"q_1770991084951_2\":null,\"q_1770991090694_8\":null,\"q_1770991090694_0\":null,\"q_1770991088795_0\":4,\"q_1770991090694_7\":[],\"q_1770991090694_5\":null,\"q_1770991088795_1\":4,\"q_1770991090694_9\":null,\"q_1770991090694_10\":null,\"q_1770991090694_2\":null,\"q_1770991088795_2\":null,\"q_1770991084951_1\":\"Tak, mam własny\",\"q_1770991090694_4\":null,\"q_1770991090694_6\":null,\"q_1770991090694_1\":null}",
+      "Score": 0,
+      "ConsentRODO": true,
+      "CertificatePdfId": "1CRpAIX53iTDMa2nb5feN7Nk-e4-J4_kW",
+      "DefinitionSnapshotID": NaN
+    },
+    {
+      "ResponseID": "r_1771286129298",
+      "SurveyID": "t1_k5_p",
+      "TaskID": 1,
+      "Version": "P",
+      "RespondentID": 333333,
+      "Timestamp": "2026-02-17 00:55:29.298",
+      "AnswersJSON": "{\"q_1770991090694_7\":[],\"q_1770991090694_6\":\"Tylko czujnik temperatury\",\"q_1770991090694_0\":\"w Łopiennie\",\"q_1770991090694_10\":\"Nie wiem, ale chętnie się dowiem.\",\"q_1770991090694_1\":\"5b\",\"q_1770991090694_3\":\"Standardowo film poklatkowy powinien mieć minimum 60 klatek na sekundę - oznacza to, że na jedną sekundę filmu potrzebne jest 60 zdjęć.\",\"q_1770991090694_8\":\"Nieiem, ale chętnie się dowiem.\",\"q_1770991090694_13\":[\"Rozumieć i tworzyć informacje.\"],\"q_1770991090694_2\":\"qwe\",\"q_1770991090694_12\":\"Używać wszędzie tego samego hasła.\",\"q_1770991090694_4\":\"Stabilizacja urządzenia, którym robione są zdjęcia, nagrywany jest film.\",\"q_1770991090694_5\":\"3\",\"q_1770991090694_11\":\"Plastik ABS.\",\"q_1770991090694_9\":\"50\"}",
+      "Score": 0,
+      "ConsentRODO": true,
+      "CertificatePdfId": "https://drive.google.com/file/d/13rakvQc-yj5-DfOL_AlqdBAMRV-exXZk/view?usp=drivesdk",
+      "DefinitionSnapshotID": "https://drive.google.com/file/d/1tTiVcm6BBYhVTvl2TTZKBK_40oNLNUqt/view?usp=drivesdk"
+    }
+  ],
+  "AuditLog": [
+    {
+      "Timestamp": "2026-02-13 14:27:03.114",
+      "User": "ankieta.exp@gmail.com",
+      "Action": "UPDATE_SURVEY",
+      "Target": "Survey",
+      "TargetID": "t1_k2_p",
+      "Details": "Updated metadata"
+    },
+    {
+      "Timestamp": "2026-02-13 14:27:04.230",
+      "User": "ankieta.exp@gmail.com",
+      "Action": "UPDATE_SURVEY",
+      "Target": "Survey",
+      "TargetID": "t1_k2_e",
+      "Details": "Updated metadata"
+    },
+    {
+      "Timestamp": "2026-02-13 14:27:05.299",
+      "User": "ankieta.exp@gmail.com",
+      "Action": "UPDATE_SURVEY",
+      "Target": "Survey",
+      "TargetID": "t1_k5_p",
+      "Details": "Updated metadata"
+    }
+  ],
+  "Certificates": [
+    {
+      "TemplateID": "cert_default",
+      "Name": "Domyślny Szablon",
+      "HTMLContent": "\n      <div style=\"width:800px; height:600px; padding:20px; text-align:center; border: 10px solid #787878\">\n        <div style=\"width:750px; height:550px; padding:20px; text-align:center; border: 5px solid #787878\">\n             <span style=\"font-size:50px; font-weight:bold\">Certyfikat Ukończenia</span>\n             <br><br>\n             <span style=\"font-size:25px\"><i>Niniejszym zaświadcza się, że</i></span>\n             <br><br>\n             <span style=\"font-size:30px\"><b>{{IMIE_NAZWA}}</b></span><br/><br/>\n             <span style=\"font-size:25px\"><i>wypełnił(a) ankietę:</i></span> <br/><br/>\n             <span style=\"font-size:30px\">{{ANKIETA}} ({{WERSJA}})</span> <br/><br/>\n             <span style=\"font-size:20px\">w ramach zadania: {{ZADANIE}}</span> <br/><br/>\n             <span style=\"font-size:25px\"><i>Data:</i></span> <br/>\n             <span style=\"font-size:30px\">{{DATA}}</span>\n        </div>\n      </div>\n      ",
+      "IsActive": true
+    }
+  ]
+}

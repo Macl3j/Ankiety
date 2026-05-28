@@ -517,12 +517,12 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                         </button>
                       </div>
                       
-                      {opt.image_url && (
+                      {((opt as any).image_url || (opt as any).image) && (
                         <div className="relative mt-1 ml-10 w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white">
-                          <img src={opt.image_url} className="w-full h-full object-cover" alt="Opcja podgląd" />
+                          <img src={(opt as any).image_url || (opt as any).image} className="w-full h-full object-cover" alt="Opcja podgląd" referrerPolicy="no-referrer" />
                           <button
                             type="button"
-                            onClick={() => setNewOptions(newOptions.map((o, i) => i === idx ? { ...o, image_url: undefined } : o))}
+                            onClick={() => setNewOptions(newOptions.map((o, i) => i === idx ? { ...o, image_url: undefined, image: undefined } as any : o))}
                             className="absolute top-1 right-1 p-0.5 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
                           >
                             <X className="w-3 h-3" />
@@ -611,7 +611,7 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                     {/* PODGLĄD WGRANEGO ZDJĘCIA */}
                     {q.image_url && (
                       <div className="w-32 h-20 rounded-lg overflow-hidden border border-gray-100 mt-2">
-                        <img src={q.image_url} className="w-full h-full object-cover" alt="Podgląd pytania" />
+                        <img src={q.image_url} className="w-full h-full object-cover" alt="Podgląd pytania" referrerPolicy="no-referrer" />
                       </div>
                     )}
 
@@ -634,9 +634,9 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${isCorrect ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
                                 <span className="truncate">{text}</span>
                               </div>
-                              {(opt as any).image_url && (
+                              {((opt as any).image_url || (opt as any).image) && (
                                 <div className="ml-4 w-16 h-16 rounded overflow-hidden border border-gray-200 bg-white">
-                                  <img src={(opt as any).image_url} className="w-full h-full object-cover" alt="Opcja miniaturka" />
+                                  <img src={(opt as any).image_url || (opt as any).image} className="w-full h-full object-cover" alt="Opcja miniaturka" referrerPolicy="no-referrer" />
                                 </div>
                               )}
                             </div>

@@ -241,19 +241,15 @@ export default function AdminDashboard() {
                         )}
                       </td>
                       <td className="py-4 text-center">
-                        {(r as any).archive_pdf_url ? (
-                          <a 
-                            href={(r as any).archive_pdf_url} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            <span>Archiwum</span>
-                          </a>
-                        ) : (
-                          <span className="text-gray-400 text-xs">brak</span>
-                        )}
+                        <a 
+                          href={(r as any).archive_pdf_url || `/api/pdf/archive?responseId=${r.id}`}
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Archiwum</span>
+                        </a>
                       </td>
                     </tr>
                   );

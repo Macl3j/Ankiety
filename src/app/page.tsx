@@ -360,7 +360,7 @@ export default function StudentPortal() {
                 {/* Wyświetlanie zdjęcia pytania (ilustracja) */}
                 {q.image_url && (
                   <div className="w-full max-h-64 rounded-xl overflow-hidden border border-gray-100 mb-4 bg-white flex items-center justify-center">
-                    <img src={q.image_url} className="max-h-64 object-contain" alt="Ilustracja do pytania" />
+                    <img src={q.image_url} className="max-h-64 object-contain" alt="Ilustracja do pytania" referrerPolicy="no-referrer" />
                   </div>
                 )}
 
@@ -384,9 +384,9 @@ export default function StudentPortal() {
                             onChange={() => handleAnswerChange(q.id, text)}
                             className="w-5 h-5 text-[#c5a059] focus:ring-[#c5a059]"
                           />
-                          {(opt as any).image_url && (
+                          {((opt as any).image_url || (opt as any).image) && (
                             <div className="w-12 h-12 rounded overflow-hidden border border-gray-200 bg-white shrink-0">
-                              <img src={(opt as any).image_url} className="w-full h-full object-cover" alt="Opcja" />
+                              <img src={(opt as any).image_url || (opt as any).image} className="w-full h-full object-cover" alt="Opcja" referrerPolicy="no-referrer" />
                             </div>
                           )}
                           <span className="text-sm text-[#1a2a3a]">{text}</span>
@@ -427,9 +427,9 @@ export default function StudentPortal() {
                             onChange={toggleCheck}
                             className="w-5 h-5 rounded text-[#c5a059] focus:ring-[#c5a059]"
                           />
-                          {(opt as any).image_url && (
+                          {((opt as any).image_url || (opt as any).image) && (
                             <div className="w-12 h-12 rounded overflow-hidden border border-gray-200 bg-white shrink-0">
-                              <img src={(opt as any).image_url} className="w-full h-full object-cover" alt="Opcja" />
+                              <img src={(opt as any).image_url || (opt as any).image} className="w-full h-full object-cover" alt="Opcja" referrerPolicy="no-referrer" />
                             </div>
                           )}
                           <span className="text-sm text-[#1a2a3a]">{text}</span>
