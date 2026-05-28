@@ -180,7 +180,7 @@ async function runImport() {
         student_code: studentCode,
         answers: parsedAnswers,
         score: Number(row.Score) || 0,
-        max_score: 0, // This could be calculated later if needed
+        max_score: 0, // Zaktualizujemy to na końcu skryptem fix_max_score
         consent: Boolean(row.ConsentRODO),
         cert_pdf_url: pdfUrl,
         created_at: row.Timestamp ? new Date(row.Timestamp).toISOString() : new Date().toISOString()
