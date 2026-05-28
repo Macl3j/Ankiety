@@ -123,7 +123,7 @@ export async function POST(request: Request) {
           wynikP: wynikP_str,
           wynikE: wynikE_str,
           przyrost: przyrost_str,
-        })
+        }) as any
       );
 
       // Ścieżka pliku w Storage: certificates/Zadanie_[X]/[Code]_[Version].pdf

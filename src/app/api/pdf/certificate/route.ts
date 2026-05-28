@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         wynikP,
         wynikE,
         przyrost,
-      })
+      }) as any
     );
 
     // Zwracamy strumień jako odpowiedź PDF do przeglądarki
