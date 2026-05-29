@@ -52,14 +52,25 @@ export async function POST(request: Request) {
       completedMap.set(`${r.task_id}_${r.version}`, true);
     });
 
-    const surveysWithCompletion = matchedSurveys.map((s: any) => ({
-      id: s.id,
-      taskId: s.task_id,
-      title: s.title,
-      group: s.group,
-      version: s.version,
-      completed: completedMap.has(`${s.task_id}_${s.version}`)
-    }));
+    const surveysWithCompletion = matchedSurveys.map((s: any) => {
+      const isCompleted = completedMap.has(`${s.task_id}_${s.version}`);
+      let locked = false;
+
+      // Jeżeli to ankieta Ewaluacyjna (E), sprawdzamy czy uczeń ma zaliczoną wersję Początkową (P) z tym samym task_id
+      if (s.version === 'E' && !completedMap.has(`${s.task_id}_P`)) {
+        locked = true;
+      }
+
+      return {
+        id: s.id,
+        taskId: s.task_id,
+        title: s.title,
+        group: s.group,
+        version: s.version,
+        completed: isCompleted,
+        locked
+      };
+    });
 
     return NextResponse.json({
       success: true,

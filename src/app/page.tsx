@@ -11,9 +11,9 @@ import {
   FileCheck, 
   Download, 
   CheckCircle2, 
-  Sparkles,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 
 interface Student {
@@ -31,6 +31,7 @@ interface Survey {
   group: string;
   version: string;
   completed: boolean;
+  locked?: boolean;
 }
 
 interface SummaryData {
@@ -317,6 +318,11 @@ export default function StudentPortal() {
                     <div className="flex items-center gap-2 text-emerald-700 font-semibold bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-lg text-sm">
                       <CheckCircle2 className="w-4 h-4 shrink-0" />
                       <span>Wypełniono</span>
+                    </div>
+                  ) : survey.locked ? (
+                    <div className="flex items-center gap-2 text-amber-700 font-semibold bg-amber-50 border border-amber-100 px-4 py-2.5 rounded-lg text-sm" title="Najpierw wypełnij Ankietę Początkową (P)!">
+                      <Lock className="w-4 h-4 shrink-0" />
+                      <span>Zablokowana</span>
                     </div>
                   ) : (
                     <button
