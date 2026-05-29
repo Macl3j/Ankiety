@@ -13,7 +13,8 @@ import {
   CheckCircle2, 
   ArrowLeft,
   AlertCircle,
-  Lock
+  Lock,
+  Sparkles
 } from 'lucide-react';
 
 interface Student {
