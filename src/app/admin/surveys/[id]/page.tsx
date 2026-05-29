@@ -276,21 +276,6 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
     setEditingIndex(idx);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-      alert("Wpisz treść pytania!");
-      return;
-    }
-
-    const qOptions = ['SINGLE', 'MULTI'].includes(newType) ? newOptions : [];
-
-    const newQ: Question = {
-      survey_id: surveyId,
-      type: newType,
-      text: newText.trim(),
-      options: qOptions,
-      order_index: questions.length + 1,
-      weight: 1,
-      image_url: newImageUrl || undefined
-    };
 
 
   // Lokalna zmiana kolejności pytań w górę/dół
