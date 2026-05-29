@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   X,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  Edit2
 } from 'lucide-react';
 
 interface Survey {
@@ -63,6 +64,9 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
   ]);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const isEditable = survey?.status === 'DRAFT';
 
   useEffect(() => {
     fetchSurveyDetails();
@@ -211,9 +215,67 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
     }
   };
 
-  // Dodawanie pytania do lokalnej listy
-  const handleAddQuestion = () => {
+  // Dodawanie lub zapisywanie edytowanego pytania
+  const handleSaveQuestion = () => {
     if (!newText.trim()) {
+      alert("Wpisz treść pytania!");
+      return;
+    }
+
+    const qOptions = ['SINGLE', 'MULTI'].includes(newType) ? newOptions : [];
+
+    if (editingIndex !== null) {
+      // Zapisz edytowane pytanie
+      const updatedQuestions = [...questions];
+      updatedQuestions[editingIndex] = {
+        ...updatedQuestions[editingIndex],
+        type: newType,
+        text: newText.trim(),
+        options: qOptions,
+        image_url: newImageUrl || undefined
+      };
+      setQuestions(updatedQuestions);
+      setEditingIndex(null);
+    } else {
+      // Dodaj nowe pytanie
+      const newQ: Question = {
+        survey_id: surveyId,
+        type: newType,
+        text: newText.trim(),
+        options: qOptions,
+        order_index: questions.length + 1,
+        weight: 1,
+        image_url: newImageUrl || undefined
+      };
+      setQuestions([...questions, newQ]);
+    }
+    
+    // Zresetowanie formularza
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setEditingIndex(null);
+    setNewText('');
+    setNewImageUrl('');
+    setNewOptions([
+      { text: 'Opcja A', correct: false },
+      { text: 'Opcja B', correct: false }
+    ]);
+  };
+
+  const handleEditQuestion = (idx: number) => {
+    const q = questions[idx];
+    setNewType(q.type);
+    setNewText(q.text);
+    setNewOptions(q.options && q.options.length > 0 ? q.options : [
+      { text: 'Opcja A', correct: false },
+      { text: 'Opcja B', correct: false }
+    ]);
+    setNewImageUrl(q.image_url || '');
+    setEditingIndex(idx);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
       alert("Wpisz treść pytania!");
       return;
     }
@@ -230,16 +292,6 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
       image_url: newImageUrl || undefined
     };
 
-    setQuestions([...questions, newQ]);
-    
-    // Zresetowanie formularza dodawania pytań
-    setNewText('');
-    setNewImageUrl('');
-    setNewOptions([
-      { text: 'Opcja A', correct: false },
-      { text: 'Opcja B', correct: false }
-    ]);
-  };
 
   // Lokalna zmiana kolejności pytań w górę/dół
   const moveQuestion = (idx: number, direction: 'up' | 'down') => {
@@ -368,7 +420,7 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
 
           <button
             onClick={saveAllQuestions}
-            disabled={saving}
+            disabled={saving || !isEditable}
             className="px-5 py-2.5 bg-[#1a2a3a] hover:bg-[#2b3c4f] disabled:opacity-50 text-white font-semibold rounded-xl text-sm flex items-center gap-2 hover:shadow active:scale-95 transition-all"
           >
             <Save className="w-4 h-4" />
@@ -387,12 +439,23 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
         </div>
       )}
 
+      {/* KOMUNIKAT DRAFT */}
+      {!isEditable && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <p className="text-sm font-semibold">Ankieta jest opublikowana (PUBLISHED). Zmień status na <strong>SZKIC (DRAFT)</strong> w prawym górnym rogu, aby móc edytować, dodawać lub usuwać pytania.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* LEWA KOLUMNA: KREATOR NOWEGO PYTANIA */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 h-fit space-y-6">
+        <div className={`bg-white rounded-2xl border border-gray-100 p-6 h-fit space-y-6 ${!isEditable ? 'opacity-50 pointer-events-none grayscale-[30%]' : ''}`}>
           <h3 className="text-xl font-serif font-bold border-b border-gray-100 pb-3 flex items-center gap-2">
-            <Plus className="w-5 h-5 text-[#c5a059]" />
-            Nowe Pytanie
+            {editingIndex !== null ? (
+              <><Edit2 className="w-5 h-5 text-[#c5a059]" /> Edytuj Pytanie</>
+            ) : (
+              <><Plus className="w-5 h-5 text-[#c5a059]" /> Nowe Pytanie</>
+            )}
           </h3>
 
           <div className="space-y-4">
@@ -539,14 +602,28 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={handleAddQuestion}
-              className="w-full py-3 bg-[#1a2a3a] hover:bg-[#2b3c4f] text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-1.5 transition-all hover:shadow active:scale-95"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Dodaj do ankiety</span>
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleSaveQuestion}
+                className="flex-1 py-3 bg-[#1a2a3a] hover:bg-[#2b3c4f] text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-1.5 transition-all hover:shadow active:scale-95"
+              >
+                {editingIndex !== null ? (
+                  <><Save className="w-4 h-4" /> Zapisz zmiany</>
+                ) : (
+                  <><Plus className="w-4 h-4" /> Dodaj do ankiety</>
+                )}
+              </button>
+              {editingIndex !== null && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition-all active:scale-95"
+                >
+                  Anuluj
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -564,12 +641,12 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
           ) : (
             <div className="space-y-4">
               {questions.map((q, idx) => (
-                <div key={idx} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow transition-shadow flex gap-4">
+                <div key={idx} className={`bg-white rounded-2xl border ${editingIndex === idx ? 'border-[#c5a059] ring-2 ring-[#c5a059]/20' : 'border-gray-100'} p-6 shadow-sm hover:shadow transition-shadow flex gap-4 ${!isEditable ? 'opacity-70 pointer-events-none' : ''}`}>
                   {/* KOLEJNOŚĆ W GÓRĘ / DÓŁ */}
                   <div className="flex flex-col items-center justify-center gap-1 text-gray-300">
                     <button 
                       onClick={() => moveQuestion(idx, 'up')}
-                      disabled={idx === 0}
+                      disabled={idx === 0 || !isEditable}
                       className="hover:text-[#1a2a3a] disabled:opacity-30 transition-colors font-bold text-lg p-1"
                     >
                       ▲
@@ -577,7 +654,7 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                     <span className="font-mono text-sm font-bold text-gray-400">{idx + 1}</span>
                     <button 
                       onClick={() => moveQuestion(idx, 'down')}
-                      disabled={idx === questions.length - 1}
+                      disabled={idx === questions.length - 1 || !isEditable}
                       className="hover:text-[#1a2a3a] disabled:opacity-30 transition-colors font-bold text-lg p-1"
                     >
                       ▼
@@ -597,13 +674,22 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                           </span>
                         )}
                       </div>
-                      <button
-                        onClick={() => deleteQuestion(idx)}
-                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Usuń pytanie"
-                      >
-                        <Trash2 className="w-4.5 h-4.5" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditQuestion(idx)}
+                          className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edytuj pytanie"
+                        >
+                          <Edit2 className="w-4.5 h-4.5" />
+                        </button>
+                        <button
+                          onClick={() => deleteQuestion(idx)}
+                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Usuń pytanie"
+                        >
+                          <Trash2 className="w-4.5 h-4.5" />
+                        </button>
+                      </div>
                     </div>
 
                     <h4 className="font-serif font-bold text-lg text-[#1a2a3a]">{q.text}</h4>
