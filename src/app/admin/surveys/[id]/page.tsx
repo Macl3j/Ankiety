@@ -75,23 +75,20 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
   const fetchSurveyDetails = async () => {
     try {
       setLoading(true);
-      
-      // 1. Pobranie ankiety
-      const { data: surveyData, error: sErr } = await supabase
-        .from('surveys')
-        .select('*')
-        .eq('id', surveyId)
-        .single();
+
+      // Ankieta i pytania nie zależą od siebie — pobierane równolegle zamiast sekwencyjnie
+      const [
+        { data: surveyData, error: sErr },
+        { data: qData, error: qErr }
+      ] = await Promise.all([
+        // 1. Pobranie ankiety
+        supabase.from('surveys').select('*').eq('id', surveyId).single(),
+        // 2. Pobranie pytań
+        supabase.from('questions').select('*').eq('survey_id', surveyId).order('order_index', { ascending: true })
+      ]);
 
       if (sErr) throw sErr;
       setSurvey(surveyData);
-
-      // 2. Pobranie pytań
-      const { data: qData, error: qErr } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('survey_id', surveyId)
-        .order('order_index', { ascending: true });
 
       if (qErr) throw qErr;
 

@@ -55,20 +55,34 @@ export default function AdminDashboard() {
       try {
         setLoading(true);
 
-        // 1. Liczba kodów uczniów
-        const { count: codesCount } = await supabase
-          .from('codes')
-          .select('*', { count: 'exact', head: true });
-
-        // 2. Liczba ankiet
-        const { count: surveysCount } = await supabase
-          .from('surveys')
-          .select('*', { count: 'exact', head: true });
-
-        // 3. Statystyki odpowiedzi i średni wynik
-        const { data: responses, count: responsesCount } = await supabase
-          .from('responses')
-          .select('score, max_score', { count: 'exact' });
+        // Zapytania niezależne od siebie — pobierane równolegle zamiast sekwencyjnie
+        const [
+          { count: codesCount },
+          { count: surveysCount },
+          { data: responses, count: responsesCount },
+          { data: allData }
+        ] = await Promise.all([
+          // 1. Liczba kodów uczniów
+          supabase.from('codes').select('*', { count: 'exact', head: true }),
+          // 2. Liczba ankiet
+          supabase.from('surveys').select('*', { count: 'exact', head: true }),
+          // 3. Statystyki odpowiedzi i średni wynik
+          supabase.from('responses').select('score, max_score', { count: 'exact' }),
+          // 4. Wszystkie odpowiedzi z relacjami
+          supabase
+            .from('responses')
+            .select(`
+              id,
+              created_at,
+              score,
+              max_score,
+              version,
+              cert_pdf_url,
+              codes (first_name, last_name, school, class, code),
+              surveys (title)
+            `)
+            .order('created_at', { ascending: false })
+        ]);
 
         let avgPercent = 0;
         if (responses && responses.length > 0) {
@@ -89,21 +103,6 @@ export default function AdminDashboard() {
           totalResponses: responsesCount || 0,
           averageScorePercent: avgPercent
         });
-
-        // 4. Wszystkie odpowiedzi z relacjami
-        const { data: allData } = await supabase
-          .from('responses')
-          .select(`
-            id,
-            created_at,
-            score,
-            max_score,
-            version,
-            cert_pdf_url,
-            codes (first_name, last_name, school, class, code),
-            surveys (title)
-          `)
-          .order('created_at', { ascending: false });
 
         setAllResponses((allData as any) || []);
 

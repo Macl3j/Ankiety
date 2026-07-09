@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import { SurveyArchiveTemplate } from '@/components/SurveyArchiveTemplate';
 import { supabaseAdmin } from '@/lib/supabaseClient';
+import { sanitizeText } from '@/lib/pdfSanitize';
 
 export async function GET(request: Request) {
   try {
@@ -57,13 +58,6 @@ export async function GET(request: Request) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
-    // Helper to remove emojis and other characters that might crash pdf-lib font encoding
-    const sanitizeText = (text: any) => {
-      if (!text) return '';
-      // allow typical latin characters, numbers, punctuation
-      return String(text).replace(/[^\x20-\x7E\xA0-\xFF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF\u2000-\u206F]/g, '');
-    };
 
     // 3. Budowanie listy odpowiedzi w formacie dla PDF
     const answersList = questions.map((q: any, i: number) => {

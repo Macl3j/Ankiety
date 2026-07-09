@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabaseClient';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { CertificateTemplate } from '@/components/CertificateTemplate';
 import { SurveyArchiveTemplate } from '@/components/SurveyArchiveTemplate';
+import { sanitizeText } from '@/lib/pdfSanitize';
 
 export async function POST(request: Request) {
   try {
@@ -65,20 +66,51 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
+    // 3b. Ankieta Ewaluacyjna (E) wymaga wcześniej zaliczonej ankiety Początkowej (P) dla tego zadania
+    // Egzekwowane po stronie serwera, żeby nie dało się tego ominąć pomijając blokadę w UI
+    let initResponse: { score: number; max_score: number } | null = null;
+    if (survey.version === 'E') {
+      const { data } = await supabaseAdmin
+        .from('responses')
+        .select('score, max_score')
+        .eq('student_code', student.code)
+        .eq('task_id', survey.task_id)
+        .eq('version', 'P')
+        .maybeSingle();
+
+      if (!data) {
+        return NextResponse.json({
+          error: `Ankieta Ewaluacyjna dla Zadania ${survey.task_id} jest zablokowana do czasu ukończenia ankiety Początkowej.`
+        }, { status: 403 });
+      }
+      initResponse = data;
+    }
+
     // 4. Automatyczna ocena ankiety
     let score = 0;
     let maxScore = 0;
 
     questions.forEach((q: any) => {
-      if (['SINGLE', 'DROPDOWN'].includes(q.type) && Array.isArray(q.options)) {
-        // Sprawdzamy czy pytanie posiada zdefiniowaną poprawną odpowiedź
-        const correctOpt = q.options.find((o: any) => o.correct === true);
-        if (correctOpt) {
-          maxScore++;
-          const userAnswer = answers[q.id];
-          if (userAnswer === correctOpt.text) {
-            score++;
-          }
+      if (!Array.isArray(q.options)) return;
+      const weight = typeof q.weight === 'number' && q.weight > 0 ? q.weight : 1;
+      const correctOptions = q.options.filter((o: any) => o.correct === true);
+      if (correctOptions.length === 0) return;
+
+      if (q.type === 'SINGLE') {
+        maxScore += weight;
+        const userAnswer = answers[q.id];
+        if (userAnswer === correctOptions[0].text) {
+          score += weight;
+        }
+      } else if (q.type === 'MULTI') {
+        maxScore += weight;
+        const userAnswer = Array.isArray(answers[q.id]) ? answers[q.id] : [];
+        const correctTexts = correctOptions.map((o: any) => o.text).sort();
+        const userTexts = [...userAnswer].sort();
+        const isExactMatch = correctTexts.length === userTexts.length &&
+          correctTexts.every((t: string, i: number) => t === userTexts[i]);
+        if (isExactMatch) {
+          score += weight;
         }
       }
     });
@@ -89,21 +121,10 @@ export async function POST(request: Request) {
     let przyrost_str = '---';
 
     if (survey.version === 'E') {
-      const { data: initResponse } = await supabaseAdmin
-        .from('responses')
-        .select('score, max_score')
-        .eq('student_code', student.code)
-        .eq('task_id', survey.task_id)
-        .eq('version', 'P')
-        .maybeSingle();
-
-      if (initResponse) {
-        wynikP_str = initResponse.max_score > 0 ? `${initResponse.score} / ${initResponse.max_score} pkt` : `${initResponse.score} pkt`;
-        const diff = score - initResponse.score;
-        przyrost_str = diff > 0 ? `+${diff} pkt` : `${diff} pkt`;
-      } else {
-        wynikP_str = 'brak ankiety P';
-      }
+      // initResponse jest już zagwarantowany (patrz krok 3b) — E nie przechodzi dalej bez zaliczonej ankiety P
+      wynikP_str = initResponse!.max_score > 0 ? `${initResponse!.score} / ${initResponse!.max_score} pkt` : `${initResponse!.score} pkt`;
+      const diff = score - initResponse!.score;
+      przyrost_str = diff > 0 ? `+${diff} pkt` : `${diff} pkt`;
     } else {
       wynikP_str = maxScore > 0 ? `${score} / ${maxScore} pkt` : '---';
     }
@@ -116,8 +137,8 @@ export async function POST(request: Request) {
       // Renderowanie certyfikatu do bufora binarnego na serwerze
       const pdfBuffer = await renderToBuffer(
         React.createElement(CertificateTemplate, {
-          studentName: `${student.first_name} ${student.last_name}`,
-          surveyTitle: survey.title,
+          studentName: sanitizeText(`${student.first_name} ${student.last_name}`),
+          surveyTitle: sanitizeText(survey.title),
           version: survey.version,
           taskId: survey.task_id,
           dateStr,
@@ -156,22 +177,26 @@ export async function POST(request: Request) {
     let archiveUrl = null;
     try {
       const answersList = questions.map((q: any, i: number) => {
+        let ans = answers[q.id] || '';
+        if (Array.isArray(ans)) {
+          ans = ans.join(', ');
+        }
         return {
           nr: i + 1,
-          question: q.text,
-          answer: answers[q.id] || ''
+          question: sanitizeText(q.text),
+          answer: sanitizeText(ans.toString())
         };
       });
 
       const archiveBuffer = await renderToBuffer(
         React.createElement(SurveyArchiveTemplate, {
-          studentName: `${student.first_name} ${student.last_name}`,
-          studentCode: student.code,
-          school: student.school,
-          studentClass: student.class,
+          studentName: sanitizeText(`${student.first_name} ${student.last_name}`),
+          studentCode: sanitizeText(student.code),
+          school: sanitizeText(student.school),
+          studentClass: sanitizeText(student.class),
           dateStr,
           consent,
-          surveyTitle: survey.title,
+          surveyTitle: sanitizeText(survey.title),
           taskId: survey.task_id,
           version: survey.version,
           answersList,
@@ -219,11 +244,17 @@ export async function POST(request: Request) {
 
     if (responseErr) {
       console.error("Response save error: ", responseErr);
+      if (responseErr.code === '23505') {
+        return NextResponse.json({
+          error: `Ten kod już wypełnił ankietę ${survey.version === 'P' ? 'Początkową' : 'Ewaluacyjną'} dla Zadania ${survey.task_id}.`
+        }, { status: 400 });
+      }
       return NextResponse.json({ error: "Błąd podczas zapisu odpowiedzi w bazie." }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
+      id: response.id,
       score,
       maxScore,
       certUrl,

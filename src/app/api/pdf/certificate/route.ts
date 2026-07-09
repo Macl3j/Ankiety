@@ -2,30 +2,89 @@
 import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import { CertificateTemplate } from '@/components/CertificateTemplate';
+import { supabaseAdmin } from '@/lib/supabaseClient';
+import { sanitizeText } from '@/lib/pdfSanitize';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const studentName = searchParams.get('studentName') || 'Uczeń';
-    const surveyTitle = searchParams.get('surveyTitle') || 'Ankieta';
-    const version = searchParams.get('version') || 'P';
-    const taskId = Number(searchParams.get('taskId')) || 1;
-    const dateStr = searchParams.get('dateStr') || new Date().toLocaleDateString('pl-PL');
-    const wynikP = searchParams.get('wynikP') || '---';
-    const wynikE = searchParams.get('wynikE') || '---';
-    const przyrost = searchParams.get('przyrost') || '---';
+    const responseId = searchParams.get('responseId');
 
-    // Generujemy strumień PDF z szablonu Reactowego
+    if (!responseId) {
+      return new Response(JSON.stringify({ error: "Brak parametru responseId." }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 1. Pobierz odpowiedź z bazy wraz z powiązanymi danymi ucznia i ankiety
+    // (nigdy nie ufamy danym certyfikatu przekazanym z URL — wszystko liczymy tu, na serwerze)
+    const { data: response, error: responseErr } = await supabaseAdmin
+      .from('responses')
+      .select(`
+        *,
+        codes (first_name, last_name),
+        surveys (title)
+      `)
+      .eq('id', responseId)
+      .single();
+
+    if (responseErr || !response) {
+      return new Response(JSON.stringify({ error: "Nie odnaleziono odpowiedzi w bazie." }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const studentInfo = response.codes;
+    const surveyInfo = response.surveys;
+
+    if (!studentInfo || !surveyInfo) {
+      return new Response(JSON.stringify({ error: "Niekompletne dane relacyjne (uczeń lub ankieta)." }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 2. Wyliczenie wyników P / E / przyrostu identycznie jak przy generowaniu certyfikatu w /api/survey/submit
+    let wynikP_str = '---';
+    let wynikE_str = response.max_score > 0 ? `${response.score} / ${response.max_score} pkt` : '---';
+    let przyrost_str = '---';
+
+    if (response.version === 'E') {
+      const { data: initResponse } = await supabaseAdmin
+        .from('responses')
+        .select('score, max_score')
+        .eq('student_code', response.student_code)
+        .eq('task_id', response.task_id)
+        .eq('version', 'P')
+        .maybeSingle();
+
+      if (initResponse) {
+        wynikP_str = initResponse.max_score > 0 ? `${initResponse.score} / ${initResponse.max_score} pkt` : `${initResponse.score} pkt`;
+        const diff = response.score - initResponse.score;
+        przyrost_str = diff > 0 ? `+${diff} pkt` : `${diff} pkt`;
+      } else {
+        wynikP_str = 'brak ankiety P';
+      }
+    } else {
+      wynikP_str = response.max_score > 0 ? `${response.score} / ${response.max_score} pkt` : '---';
+    }
+
+    const studentName = sanitizeText(`${studentInfo.first_name} ${studentInfo.last_name}`);
+    const dateStr = sanitizeText(new Date(response.created_at).toLocaleDateString('pl-PL'));
+
+    // 3. Generujemy strumień PDF z szablonu Reactowego
     const stream = await renderToStream(
       React.createElement(CertificateTemplate, {
         studentName,
-        surveyTitle,
-        version,
-        taskId,
+        surveyTitle: sanitizeText(surveyInfo.title),
+        version: response.version,
+        taskId: response.task_id,
         dateStr,
-        wynikP,
-        wynikE,
-        przyrost,
+        wynikP: sanitizeText(wynikP_str),
+        wynikE: sanitizeText(wynikE_str),
+        przyrost: sanitizeText(przyrost_str),
       }) as any
     );
 

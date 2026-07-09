@@ -36,6 +36,7 @@ interface Survey {
 }
 
 interface SummaryData {
+  id: string;
   score: number;
   maxScore: number;
   certUrl: string;
@@ -168,8 +169,13 @@ export default function StudentPortal() {
       return;
     }
 
-    // Sprawdzenie, czy wszystkie pytania mają odpowiedzi
-    const unanswered = questions.filter(q => q.weight > 0 && (answers[q.id] === undefined || answers[q.id] === ''));
+    // Sprawdzenie, czy wszystkie pytania mają odpowiedzi (w tym puste zaznaczenia MULTI)
+    const unanswered = questions.filter(q => {
+      if (q.weight <= 0) return false;
+      const a = answers[q.id];
+      if (Array.isArray(a)) return a.length === 0;
+      return a === undefined || a === '';
+    });
     if (unanswered.length > 0) {
       setError('Proszę odpowiedzieć na wszystkie pytania przed wysłaniem.');
       return;
@@ -197,6 +203,7 @@ export default function StudentPortal() {
       }
 
       setSummary({
+        id: data.id,
         score: data.score,
         maxScore: data.maxScore,
         certUrl: data.certUrl,
@@ -570,8 +577,9 @@ export default function StudentPortal() {
               </a>
             ) : (
               // Alternatywny link na wypadek problemów z wrzuceniem do Storage (Edge streaming)
+              // Dane certyfikatu są tu zawsze pobierane z bazy po responseId, nigdy z parametrów URL
               <a
-                href={`/api/pdf/certificate?studentName=${encodeURIComponent(student.firstName + ' ' + student.lastName)}&surveyTitle=${encodeURIComponent(activeSurvey.title)}&version=${activeSurvey.version}&taskId=${activeSurvey.taskId}&wynikP=${encodeURIComponent(summary.wynikP)}&wynikE=${encodeURIComponent(summary.wynikE)}&przyrost=${encodeURIComponent(summary.przyrost)}`}
+                href={`/api/pdf/certificate?responseId=${summary.id}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-4 bg-[#c5a059] hover:bg-[#b08b47] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:shadow-lg active:scale-95 transition-all duration-300"
