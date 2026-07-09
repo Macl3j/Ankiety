@@ -16,6 +16,7 @@ import {
   Lock,
   Sparkles
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Student {
   code: string;
@@ -103,54 +104,30 @@ export default function StudentPortal() {
     setConsent(false);
 
     try {
-      // Pobranie pełnej ankiety z Supabase (przez publicznego klienta z RLS)
-      // Ponieważ pytania i ankiety są publiczne w RLS dla statusu PUBLISHED, pobieramy je przez API lub bezpośrednio.
-      // Wykorzystamy bezpieczny odczyt przez standardowy interfejs Supabase lub API endpoint
-      // Dla wygody stworzymy szybkie odpytanie Supabase na kliencie
-      const { data: fullSurvey, error: qErr } = await fetchSurveyQuestions(survey.id);
-      
-      if (qErr || !fullSurvey) {
+      // Pobranie pytań przez klienta Supabase (publiczny odczyt, RLS pozwala na
+      // SELECT dla pytań należących do opublikowanej ankiety)
+      const { data: questionsData, error: qErr } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('survey_id', survey.id)
+        .order('order_index', { ascending: true });
+
+      if (qErr || !questionsData) {
         throw new Error('Nie udało się wczytać pytań do tej ankiety.');
       }
 
-      setQuestions(fullSurvey.questions || []);
-      setStep('survey');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Pomocniczy fetcher pytań z Supabase Client-side (lub szybkiej symulacji)
-  const fetchSurveyQuestions = async (surveyId: string) => {
-    try {
-      // Dla optymalizacji i prostoty wykonamy zapytanie do API lub zasymulujemy pobranie pytań
-      // Zrobimy prosty fetch pytań z Supabase REST API przez publicznego klienta anonimowego.
-      // W Supabase adres jest zdefiniowany w env. Pytania są publicznie widoczne, jeśli ankieta jest opublikowana.
-      // Wczytamy z bazy przy użyciu klienta publicznego w Next.js
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
-      const res = await fetch(`${supabaseUrl}/rest/v1/questions?survey_id=eq.${surveyId}&select=*&order=order_index.asc`, {
-        headers: {
-          'apikey': supabaseKey || '',
-          'Authorization': `Bearer ${supabaseKey}`
-        }
-      });
-      
-      if (!res.ok) throw new Error();
-      const questionsData = await res.json();
-      
       // Parsujemy JSON z opcji pytań
       const parsedQuestions = questionsData.map((q: any) => ({
         ...q,
         options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options
       }));
 
-      return { data: { questions: parsedQuestions }, error: null };
-    } catch (e) {
-      return { data: null, error: true };
+      setQuestions(parsedQuestions);
+      setStep('survey');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 

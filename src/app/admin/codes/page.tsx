@@ -78,7 +78,7 @@ export default function ManageCodes() {
   };
 
   // Generator unikalnego kodu na podstawie imienia i klasy (np. ALAN5A)
-  const generateUniqueCode = (first: string, cls: string): string => {
+  const generateUniqueCode = (first: string, cls: string, existingCodes: string[]): string => {
     const cleanFirst = first.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z]/g, '');
     const cleanClass = cls.toUpperCase().replace(/\s+/g, '');
     const prefix = cleanFirst.slice(0, 4); // Pierwsze 4 litery imienia
@@ -87,11 +87,18 @@ export default function ManageCodes() {
     // Sprawdzamy czy w pobranych już kodach istnieje taki sam
     let finalCode = baseCode;
     let counter = 1;
-    while (codes.some(c => c.code === finalCode)) {
+    while (existingCodes.includes(finalCode)) {
       finalCode = `${baseCode}${counter}`;
       counter++;
     }
     return finalCode;
+  };
+
+  // Pobiera świeżą listę istniejących kodów tuż przed generowaniem, żeby zminimalizować
+  // okno wyścigu z innym równoległym zapisem (np. druga otwarta karta przeglądarki)
+  const fetchExistingCodeStrings = async (): Promise<string[]> => {
+    const { data } = await supabase.from('codes').select('code');
+    return (data || []).map((c: any) => c.code);
   };
 
   // Dodawanie jednego kodu
@@ -103,7 +110,8 @@ export default function ManageCodes() {
     }
 
     try {
-      const generatedCode = generateUniqueCode(firstName, className);
+      const existingCodes = await fetchExistingCodeStrings();
+      const generatedCode = generateUniqueCode(firstName, className, existingCodes);
       const { error } = await supabase
         .from('codes')
         .insert({
@@ -114,7 +122,12 @@ export default function ManageCodes() {
           class: className.trim()
         });
 
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === '23505') {
+          throw new Error('Konflikt kodów — ktoś inny dodał ucznia w tym samym momencie. Spróbuj ponownie.');
+        }
+        throw error;
+      }
 
       setMessage({ text: `Pomyślnie dodano ucznia. Wygenerowany kod: ${generatedCode}`, type: 'success' });
       setFirstName('');
@@ -141,25 +154,19 @@ export default function ManageCodes() {
 
     try {
       const rowsToInsert: any[] = [];
-      const tempCodesList = [...codes];
+      const existingCodes = await fetchExistingCodeStrings();
 
       lines.forEach(line => {
         const parts = line.split(/\s+/);
         const first = parts[0] || 'Uczeń';
         const last = parts.slice(1).join(' ') || 'BrakNazwiska';
 
-        // Generowanie z weryfikacją lokalnej unikalności w pętli
-        const cleanFirst = first.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z]/g, '');
-        const cleanClass = className.toUpperCase().replace(/\s+/g, '');
-        const prefix = cleanFirst.slice(0, 4);
-        const baseCode = `${prefix}${cleanClass}`;
-        
-        let finalCode = baseCode;
-        let counter = 1;
-        while (tempCodesList.some(c => c.code === finalCode) || rowsToInsert.some(r => r.code === finalCode)) {
-          finalCode = `${baseCode}${counter}`;
-          counter++;
-        }
+        // Generowanie z weryfikacją unikalności względem świeżo pobranych kodów z bazy
+        // oraz kodów już przygotowanych w tej samej paczce
+        const finalCode = generateUniqueCode(first, className, [
+          ...existingCodes,
+          ...rowsToInsert.map(r => r.code)
+        ]);
 
         rowsToInsert.push({
           code: finalCode,
@@ -174,7 +181,12 @@ export default function ManageCodes() {
         .from('codes')
         .insert(rowsToInsert);
 
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === '23505') {
+          throw new Error('Konflikt kodów — ktoś inny dodał ucznia w tym samym momencie. Odśwież i spróbuj ponownie.');
+        }
+        throw error;
+      }
 
       setMessage({ text: `Pomyślnie wygenerowano ${rowsToInsert.length} kodów uczniów!`, type: 'success' });
       setBulkInput('');

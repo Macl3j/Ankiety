@@ -34,11 +34,13 @@ export async function POST(request: Request) {
 
     // Filtrujemy ankiety dopasowane do grupy/klasy ucznia
     // Klasy ucznia np: '5a', '5b' -> pasują do ankiet dla grupy 'Klasa 5'
-    const studentClassNum = student.class.replace(/\D/g, ''); // Wyciąga cyfrę np '5' z '5a'
-    
+    // Wyciągamy tylko wiodącą sekwencję cyfr (a nie wszystkie cyfry w stringu), żeby
+    // uniknąć sklejania np. '5' i '2' z 'Klasa 5 (grupa 2)' w jedno "52"
+    const studentClassNum = student.class.match(/^\d+/)?.[0] || '';
+
     const matchedSurveys = surveys.filter((s: any) => {
-      const surveyGroupNum = s.group.replace(/\D/g, ''); // Wyciąga np '5' z 'Klasa 5'
-      return studentClassNum === surveyGroupNum;
+      const surveyGroupNum = s.group.match(/\d+/)?.[0] || '';
+      return studentClassNum !== '' && studentClassNum === surveyGroupNum;
     });
 
     // 3. Sprawdzamy statusy wypełnienia (P i E) dla każdej ankiety przez tego konkretnego ucznia
