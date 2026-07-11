@@ -3,21 +3,43 @@ import { supabaseAdmin } from '@/lib/supabaseClient';
 
 export const dynamic = 'force-dynamic';
 
+// Supabase/PostgREST domyślnie ucina każde zapytanie bez .range() do 1000 wierszy.
+// Przy tysiącach odpowiedzi (po imporcie archiwum MS Forms) trzeba pobrać wszystko
+// partiami, inaczej cała agregacja (analityka) liczy się tylko z ułamka danych.
+async function fetchAllRows<T>(
+  build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: any }>
+): Promise<T[]> {
+  const PAGE = 1000;
+  const all: T[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await build(from, from + PAGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    all.push(...data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+
+  return all;
+}
+
 export async function GET() {
   try {
-    // Fetch all responses and codes.
-    // Since we have around 800 responses, we can fetch all and aggregate in memory.
-    const { data: responses, error: respError } = await supabaseAdmin
-      .from('responses')
-      .select('score, max_score, created_at, student_code, version');
-      
-    if (respError) throw respError;
+    const responses = await fetchAllRows<any>((from, to) =>
+      supabaseAdmin
+        .from('responses')
+        .select('score, max_score, created_at, student_code, version')
+        .range(from, to)
+    );
 
-    const { data: codes, error: codesError } = await supabaseAdmin
-      .from('codes')
-      .select('code, school, class');
-
-    if (codesError) throw codesError;
+    const codes = await fetchAllRows<any>((from, to) =>
+      supabaseAdmin
+        .from('codes')
+        .select('code, school, class')
+        .range(from, to)
+    );
 
     // Create a code map for fast lookup
     const codeMap = new Map();
