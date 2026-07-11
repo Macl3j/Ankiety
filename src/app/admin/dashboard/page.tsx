@@ -22,7 +22,8 @@ interface LatestResponse {
   score: number;
   max_score: number;
   version: string;
-  cert_pdf_url: string;
+  cert_pdf_url: string | null;
+  archive_pdf_url: string | null;
   codes: {
     first_name: string;
     last_name: string;
@@ -42,105 +43,115 @@ export default function AdminDashboard() {
     totalResponses: 0,
     averageScorePercent: 0
   });
-  const [allResponses, setAllResponses] = useState<LatestResponse[]>([]);
+  const [pageResponses, setPageResponses] = useState<LatestResponse[]>([]);
+  const [filteredCount, setFilteredCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
 
-  // Wyszukiwanie i paginacja
+  // Wyszukiwanie i paginacja — obie realizowane po stronie serwera (.range()), bo
+  // Supabase/PostgREST domyślnie ucina wynik zapytania bez .range() do 1000 wierszy,
+  // co przy tysiącach odpowiedzi cichutko gubiło większość danych z widoku i ze średniej.
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  // Statystyki KPI ładowane raz przy wejściu na stronę
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchStats = async () => {
       try {
         setLoading(true);
-
-        // Zapytania niezależne od siebie — pobierane równolegle zamiast sekwencyjnie
         const [
           { count: codesCount },
           { count: surveysCount },
-          { data: responses, count: responsesCount },
-          { data: allData }
+          { count: responsesCount },
+          { data: avgData }
         ] = await Promise.all([
-          // 1. Liczba kodów uczniów
           supabase.from('codes').select('*', { count: 'exact', head: true }),
-          // 2. Liczba ankiet
           supabase.from('surveys').select('*', { count: 'exact', head: true }),
-          // 3. Statystyki odpowiedzi i średni wynik
-          supabase.from('responses').select('score, max_score', { count: 'exact' }),
-          // 4. Wszystkie odpowiedzi z relacjami
-          supabase
-            .from('responses')
-            .select(`
+          supabase.from('responses').select('*', { count: 'exact', head: true }),
+          supabase.rpc('get_average_score_percent')
+        ]);
+
+        setStats({
+          totalCodes: codesCount || 0,
+          totalSurveys: surveysCount || 0,
+          totalResponses: responsesCount || 0,
+          averageScorePercent: (avgData as unknown as number) || 0
+        });
+      } catch (err) {
+        console.error("Dashboard stats error: ", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  // Debounce wyszukiwania (300ms), żeby nie odpytywać bazy przy każdym naciśnięciu klawisza
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  // Reset paginacji po zmianie wyszukiwania
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedQuery]);
+
+  // Pobranie aktualnej strony tabeli (i przeliczenie licznika wyników) po zmianie strony/wyszukiwania
+  useEffect(() => {
+    const fetchPage = async () => {
+      try {
+        setTableLoading(true);
+        const from = (currentPage - 1) * itemsPerPage;
+        const to = from + itemsPerPage - 1;
+        const hasSearch = debouncedQuery.trim().length > 0;
+
+        let query = supabase
+          .from('responses')
+          .select(
+            `
               id,
               created_at,
               score,
               max_score,
               version,
               cert_pdf_url,
-              codes (first_name, last_name, school, class, code),
+              archive_pdf_url,
+              codes${hasSearch ? '!inner' : ''} (first_name, last_name, school, class, code),
               surveys (title)
-            `)
-            .order('created_at', { ascending: false })
-        ]);
+            `,
+            { count: 'exact' }
+          )
+          .order('created_at', { ascending: false })
+          .range(from, to);
 
-        let avgPercent = 0;
-        if (responses && responses.length > 0) {
-          let totalScore = 0;
-          let totalMax = 0;
-          responses.forEach(r => {
-            if (r.max_score > 0) {
-              totalScore += r.score;
-              totalMax += r.max_score;
-            }
-          });
-          avgPercent = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
+        if (hasSearch) {
+          const q = debouncedQuery.trim();
+          query = query.or(
+            `first_name.ilike.%${q}%,last_name.ilike.%${q}%,code.ilike.%${q}%`,
+            { foreignTable: 'codes' }
+          );
         }
 
-        setStats({
-          totalCodes: codesCount || 0,
-          totalSurveys: surveysCount || 0,
-          totalResponses: responsesCount || 0,
-          averageScorePercent: avgPercent
-        });
+        const { data, count, error } = await query;
+        if (error) throw error;
 
-        setAllResponses((allData as any) || []);
-
+        setPageResponses((data as any) || []);
+        setFilteredCount(count || 0);
       } catch (err) {
-        console.error("Dashboard data error: ", err);
+        console.error("Dashboard table page error: ", err);
       } finally {
-        setLoading(false);
+        setTableLoading(false);
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    fetchPage();
+  }, [currentPage, debouncedQuery]);
 
-  // Filtrowanie wyników
-  const filteredResponses = allResponses.filter(r => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    const studentInfo = r.codes;
-    if (!studentInfo) return false;
-    
-    return (
-      (studentInfo.first_name && studentInfo.first_name.toLowerCase().includes(q)) ||
-      (studentInfo.last_name && studentInfo.last_name.toLowerCase().includes(q)) ||
-      (studentInfo.code && studentInfo.code.toLowerCase().includes(q))
-    );
-  });
-
-  // Reset paginacji po zmianie wyszukiwania
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
-
-  // Paginacja
-  const totalPages = Math.ceil(filteredResponses.length / itemsPerPage);
-  const paginatedResponses = filteredResponses.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredCount / itemsPerPage));
 
   if (loading) {
     return (
@@ -206,7 +217,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <h3 className="text-xl font-serif font-bold flex items-center gap-2">
             <Activity className="w-5 h-5 text-[#c5a059]" />
-            Wypełnione Ankiety ({filteredResponses.length})
+            Wypełnione Ankiety ({filteredCount})
           </h3>
 
           <div className="relative">
@@ -238,14 +249,20 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-sm">
-              {paginatedResponses.length === 0 ? (
+              {tableLoading ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-gray-400">
+                    Ładowanie...
+                  </td>
+                </tr>
+              ) : pageResponses.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-gray-400">
                     Brak wyników do wyświetlenia.
                   </td>
                 </tr>
               ) : (
-                paginatedResponses.map((r) => {
+                pageResponses.map((r) => {
                   const studentInfo = r.codes;
                   const surveyInfo = r.surveys;
                   const dateObj = new Date(r.created_at);
@@ -296,7 +313,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 text-center">
                         <a 
-                          href={(r as any).archive_pdf_url || `/api/pdf/archive?responseId=${r.id}`}
+                          href={r.archive_pdf_url || `/api/pdf/archive?responseId=${r.id}`}
                           target="_blank" 
                           rel="noreferrer" 
                           className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
