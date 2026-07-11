@@ -45,32 +45,53 @@ export async function GET(request: Request) {
       });
     }
 
-    // 2. Pobierz strukturę pytań dla tej ankiety
-    const { data: questions, error: questionsErr } = await supabaseAdmin
-      .from('questions')
-      .select('*')
-      .eq('survey_id', response.survey_id)
-      .order('order_index', { ascending: true });
+    // 2. Budowanie listy odpowiedzi w formacie dla PDF.
+    // Historyczne odpowiedzi zaimportowane z MS Forms (source='ms_forms_import') nie mają
+    // odpowiadającego wpisu w live tabeli `questions` — ich pytania są zdenormalizowane
+    // wprost w `answers` jako {"q_1": {question, answer}, ...}. Dla odpowiedzi z live-flow
+    // (`source='live'`) `answers` jest kluczowane po UUID pytania, więc trzeba je złączyć
+    // z bieżącą tabelą `questions`, żeby uzyskać treść pytania.
+    let answersList: { nr: number; question: string; answer: string }[];
 
-    if (questionsErr || !questions) {
-      return new Response(JSON.stringify({ error: "Błąd podczas wczytywania pytań." }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
+    if (response.source === 'ms_forms_import') {
+      const denormalized = response.answers as Record<string, { question: string; answer: string }>;
+      answersList = Object.keys(denormalized)
+        .sort((a, b) => {
+          const na = parseInt(a.replace('q_', ''), 10);
+          const nb = parseInt(b.replace('q_', ''), 10);
+          return na - nb;
+        })
+        .map((key, i) => ({
+          nr: i + 1,
+          question: sanitizeText(denormalized[key].question),
+          answer: sanitizeText(denormalized[key].answer)
+        }));
+    } else {
+      const { data: questions, error: questionsErr } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .eq('survey_id', response.survey_id)
+        .order('order_index', { ascending: true });
+
+      if (questionsErr || !questions) {
+        return new Response(JSON.stringify({ error: "Błąd podczas wczytywania pytań." }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      answersList = questions.map((q: any, i: number) => {
+        let ans = response.answers[q.id] || '';
+        if (Array.isArray(ans)) {
+          ans = ans.join(', ');
+        }
+        return {
+          nr: i + 1,
+          question: sanitizeText(q.text),
+          answer: sanitizeText(ans.toString())
+        };
       });
     }
-
-    // 3. Budowanie listy odpowiedzi w formacie dla PDF
-    const answersList = questions.map((q: any, i: number) => {
-      let ans = response.answers[q.id] || '';
-      if (Array.isArray(ans)) {
-        ans = ans.join(', ');
-      }
-      return {
-        nr: i + 1,
-        question: sanitizeText(q.text),
-        answer: sanitizeText(ans.toString())
-      };
-    });
 
     const dateStr = new Date(response.created_at).toLocaleDateString('pl-PL');
 
