@@ -3,7 +3,7 @@ import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import { SurveyArchiveTemplate } from '@/components/SurveyArchiveTemplate';
 import { supabaseAdmin } from '@/lib/supabaseClient';
-import { sanitizeText } from '@/lib/pdfSanitize';
+import { sanitizeText, asciiFilename } from '@/lib/pdfSanitize';
 
 export async function GET(request: Request) {
   try {
@@ -115,7 +115,7 @@ export async function GET(request: Request) {
     return new Response(stream as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="Karta_Odpowiedzi_${studentInfo.first_name}_${studentInfo.last_name}.pdf"`,
+        'Content-Disposition': `inline; filename="Karta_Odpowiedzi_${asciiFilename(studentInfo.first_name)}_${asciiFilename(studentInfo.last_name)}.pdf"`,
         'Cache-Control': 'no-store, max-age=0',
       },
     });

@@ -3,7 +3,7 @@ import React from 'react';
 import { renderToStream } from '@react-pdf/renderer';
 import { CertificateTemplate } from '@/components/CertificateTemplate';
 import { supabaseAdmin } from '@/lib/supabaseClient';
-import { sanitizeText } from '@/lib/pdfSanitize';
+import { sanitizeText, asciiFilename } from '@/lib/pdfSanitize';
 
 export async function GET(request: Request) {
   try {
@@ -92,7 +92,7 @@ export async function GET(request: Request) {
     return new Response(stream as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="Certyfikat_${studentName.replace(/\s+/g, '_')}.pdf"`,
+        'Content-Disposition': `inline; filename="Certyfikat_${asciiFilename(studentName)}.pdf"`,
         'Cache-Control': 'no-store, max-age=0',
       },
     });
