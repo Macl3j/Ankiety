@@ -12,8 +12,9 @@ interface QAItem {
   points: number | null;
 }
 
-// Buduje liste {question, answer, points} dla odpowiedzi zaimportowanej z MS Forms
-// (answers jest juz zdenormalizowane jako {"q_1": {question, answer, points}, ...}).
+// Buduje liste {question, answer, points} dla odpowiedzi zaimportowanej spoza live-flow
+// (MS Forms lub arkusz rownoleglego systemu) - answers jest juz zdenormalizowane jako
+// {"q_1": {question, answer, points}, ...}.
 function buildQAFromImported(answers: Record<string, any>): QAItem[] {
   return Object.keys(answers)
     .sort((a, b) => {
@@ -127,11 +128,11 @@ export async function GET(request: Request) {
       });
     }
 
-    const qaE = eResponse.source === 'ms_forms_import'
+    const qaE = eResponse.source !== 'live'
       ? buildQAFromImported(eResponse.answers)
       : await buildQAFromLive(eResponse.survey_id, eResponse.answers);
 
-    const qaP = pResponse.source === 'ms_forms_import'
+    const qaP = pResponse.source !== 'live'
       ? buildQAFromImported(pResponse.answers)
       : await buildQAFromLive(pResponse.survey_id, pResponse.answers);
 

@@ -46,14 +46,14 @@ export async function GET(request: Request) {
     }
 
     // 2. Budowanie listy odpowiedzi w formacie dla PDF.
-    // Historyczne odpowiedzi zaimportowane z MS Forms (source='ms_forms_import') nie mają
-    // odpowiadającego wpisu w live tabeli `questions` — ich pytania są zdenormalizowane
-    // wprost w `answers` jako {"q_1": {question, answer}, ...}. Dla odpowiedzi z live-flow
-    // (`source='live'`) `answers` jest kluczowane po UUID pytania, więc trzeba je złączyć
-    // z bieżącą tabelą `questions`, żeby uzyskać treść pytania.
+    // Historyczne odpowiedzi zaimportowane spoza live-flow (source='ms_forms_import' lub
+    // 'sheet_import') nie mają odpowiadającego wpisu w live tabeli `questions` — ich pytania
+    // są zdenormalizowane wprost w `answers` jako {"q_1": {question, answer}, ...}. Dla
+    // odpowiedzi z live-flow (`source='live'`) `answers` jest kluczowane po UUID pytania,
+    // więc trzeba je złączyć z bieżącą tabelą `questions`, żeby uzyskać treść pytania.
     let answersList: { nr: number; question: string; answer: string }[];
 
-    if (response.source === 'ms_forms_import') {
+    if (response.source !== 'live') {
       const denormalized = response.answers as Record<string, { question: string; answer: string }>;
       answersList = Object.keys(denormalized)
         .sort((a, b) => {
