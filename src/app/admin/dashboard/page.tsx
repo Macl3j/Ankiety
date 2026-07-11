@@ -246,18 +246,19 @@ export default function AdminDashboard() {
                 <th className="py-4 font-bold text-center">Wynik</th>
                 <th className="py-4 font-bold text-center">Certyfikat</th>
                 <th className="py-4 font-bold text-center">Karta Odpowiedzi</th>
+                <th className="py-4 font-bold text-center">Analiza</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-sm">
               {tableLoading ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-gray-400">
+                  <td colSpan={9} className="py-12 text-center text-gray-400">
                     Ładowanie...
                   </td>
                 </tr>
               ) : pageResponses.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-gray-400">
+                  <td colSpan={9} className="py-12 text-center text-gray-400">
                     Brak wyników do wyświetlenia.
                   </td>
                 </tr>
@@ -321,6 +322,21 @@ export default function AdminDashboard() {
                           <Download className="w-3.5 h-3.5" />
                           <span>Archiwum</span>
                         </a>
+                      </td>
+                      <td className="py-4 text-center">
+                        {r.version === 'E' ? (
+                          <a
+                            href={`/api/pdf/analysis?responseId=${r.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Analiza</span>
+                          </a>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
                       </td>
                     </tr>
                   );
