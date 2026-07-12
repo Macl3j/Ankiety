@@ -3,17 +3,20 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { 
-  Users, 
-  FileSpreadsheet, 
-  Activity, 
-  School, 
+import {
+  Users,
+  FileSpreadsheet,
+  Activity,
+  School,
   Download,
   CheckCircle,
   TrendingUp,
   Search,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
 } from 'lucide-react';
 
 interface LatestResponse {
@@ -55,6 +58,23 @@ export default function AdminDashboard() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+
+  // Sortowanie po nagłówku kolumny — realizowane po stronie serwera (.order()),
+  // spójnie z resztą tabeli (paginacja/wyszukiwanie), żeby sortowało po CAŁYM
+  // zbiorze wyników, a nie tylko po aktualnie wczytanej stronie.
+  type SortColumn = 'student' | 'school' | 'survey' | 'version' | 'created_at' | 'score';
+  const [sortColumn, setSortColumn] = useState<SortColumn>('created_at');
+  const [sortAsc, setSortAsc] = useState(false);
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortAsc(prev => !prev);
+    } else {
+      setSortColumn(column);
+      setSortAsc(true);
+    }
+    setCurrentPage(1);
+  };
 
   // Statystyki KPI ładowane raz przy wejściu na stronę
   useEffect(() => {
@@ -124,9 +144,34 @@ export default function AdminDashboard() {
               surveys (title)
             `,
             { count: 'exact' }
-          )
-          .order('created_at', { ascending: false })
-          .range(from, to);
+          );
+
+        switch (sortColumn) {
+          case 'student':
+            query = query
+              .order('last_name', { foreignTable: 'codes', ascending: sortAsc })
+              .order('first_name', { foreignTable: 'codes', ascending: sortAsc });
+            break;
+          case 'school':
+            query = query
+              .order('school', { foreignTable: 'codes', ascending: sortAsc })
+              .order('class', { foreignTable: 'codes', ascending: sortAsc });
+            break;
+          case 'survey':
+            query = query.order('title', { foreignTable: 'surveys', ascending: sortAsc });
+            break;
+          case 'version':
+            query = query.order('version', { ascending: sortAsc });
+            break;
+          case 'score':
+            query = query.order('score', { ascending: sortAsc });
+            break;
+          case 'created_at':
+          default:
+            query = query.order('created_at', { ascending: sortAsc });
+            break;
+        }
+        query = query.range(from, to);
 
         if (hasSearch) {
           const q = debouncedQuery.trim();
@@ -149,7 +194,7 @@ export default function AdminDashboard() {
     };
 
     fetchPage();
-  }, [currentPage, debouncedQuery]);
+  }, [currentPage, debouncedQuery, sortColumn, sortAsc]);
 
   const totalPages = Math.max(1, Math.ceil(filteredCount / itemsPerPage));
 
@@ -238,12 +283,12 @@ export default function AdminDashboard() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
-                <th className="py-4 font-bold">Uczeń</th>
-                <th className="py-4 font-bold">Szkoła & Klasa</th>
-                <th className="py-4 font-bold">Ankieta</th>
-                <th className="py-4 font-bold text-center">Wersja</th>
-                <th className="py-4 font-bold">Data wypełnienia</th>
-                <th className="py-4 font-bold text-center">Wynik</th>
+                <SortableHeader column="student" label="Uczeń" sortColumn={sortColumn} sortAsc={sortAsc} onSort={handleSort} />
+                <SortableHeader column="school" label="Szkoła & Klasa" sortColumn={sortColumn} sortAsc={sortAsc} onSort={handleSort} />
+                <SortableHeader column="survey" label="Ankieta" sortColumn={sortColumn} sortAsc={sortAsc} onSort={handleSort} />
+                <SortableHeader column="version" label="Wersja" sortColumn={sortColumn} sortAsc={sortAsc} onSort={handleSort} center />
+                <SortableHeader column="created_at" label="Data wypełnienia" sortColumn={sortColumn} sortAsc={sortAsc} onSort={handleSort} />
+                <SortableHeader column="score" label="Wynik" sortColumn={sortColumn} sortAsc={sortAsc} onSort={handleSort} center />
                 <th className="py-4 font-bold text-center">Certyfikat</th>
                 <th className="py-4 font-bold text-center">Karta Odpowiedzi</th>
                 <th className="py-4 font-bold text-center">Analiza</th>
@@ -372,5 +417,39 @@ export default function AdminDashboard() {
         )}
       </div>
     </div>
+  );
+}
+
+function SortableHeader({
+  column,
+  label,
+  sortColumn,
+  sortAsc,
+  onSort,
+  center = false,
+}: {
+  column: 'student' | 'school' | 'survey' | 'version' | 'created_at' | 'score';
+  label: string;
+  sortColumn: string;
+  sortAsc: boolean;
+  onSort: (column: 'student' | 'school' | 'survey' | 'version' | 'created_at' | 'score') => void;
+  center?: boolean;
+}) {
+  const isActive = sortColumn === column;
+  return (
+    <th className={`py-4 font-bold select-none ${center ? 'text-center' : ''}`}>
+      <button
+        type="button"
+        onClick={() => onSort(column)}
+        className={`inline-flex items-center gap-1 hover:text-[#1a2a3a] transition-colors ${isActive ? 'text-[#1a2a3a]' : ''}`}
+      >
+        <span>{label}</span>
+        {isActive ? (
+          sortAsc ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+        ) : (
+          <ArrowUpDown className="w-3 h-3 text-gray-300" />
+        )}
+      </button>
+    </th>
   );
 }
