@@ -59,17 +59,37 @@ export default function ManageCodes() {
     setFilteredCodes(filtered);
   }, [search, codes]);
 
-  const fetchCodes = async () => {
-    try {
-      setLoading(true);
+  // Supabase/PostgREST domyślnie ucina każde zapytanie bez .range() do 1000 wierszy.
+  // Przy >10 000 kodów (po imporcie archiwum MS Forms) trzeba pobrać wszystko partiami,
+  // inaczej lista i eksport CSV cichutko pokazują tylko najnowszy tysiąc.
+  const fetchAllCodes = async (): Promise<StudentCode[]> => {
+    const PAGE = 1000;
+    const all: StudentCode[] = [];
+    let from = 0;
+
+    while (true) {
       const { data, error } = await supabase
         .from('codes')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE - 1);
 
       if (error) throw error;
-      setCodes(data || []);
-      setFilteredCodes(data || []);
+      if (!data || data.length === 0) break;
+      all.push(...(data as StudentCode[]));
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+
+    return all;
+  };
+
+  const fetchCodes = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchAllCodes();
+      setCodes(data);
+      setFilteredCodes(data);
     } catch (err) {
       console.error("Fetch codes error: ", err);
     } finally {
@@ -95,10 +115,24 @@ export default function ManageCodes() {
   };
 
   // Pobiera świeżą listę istniejących kodów tuż przed generowaniem, żeby zminimalizować
-  // okno wyścigu z innym równoległym zapisem (np. druga otwarta karta przeglądarki)
+  // okno wyścigu z innym równoległym zapisem (np. druga otwarta karta przeglądarki).
+  // Paginowane z tego samego powodu co fetchAllCodes — bez .range() PostgREST ucina
+  // wynik do 1000 wierszy, co przy >10 000 kodów pozwoliłoby wygenerować kolidujący kod.
   const fetchExistingCodeStrings = async (): Promise<string[]> => {
-    const { data } = await supabase.from('codes').select('code');
-    return (data || []).map((c: any) => c.code);
+    const PAGE = 1000;
+    const all: string[] = [];
+    let from = 0;
+
+    while (true) {
+      const { data, error } = await supabase.from('codes').select('code').range(from, from + PAGE - 1);
+      if (error) break;
+      if (!data || data.length === 0) break;
+      all.push(...data.map((c: any) => c.code));
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+
+    return all;
   };
 
   // Dodawanie jednego kodu
