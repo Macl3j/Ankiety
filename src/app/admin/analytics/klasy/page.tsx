@@ -239,6 +239,12 @@ export default function ClassAnalyticsPage() {
             />
           </div>
 
+          {roundId && ((summary.studentsP > 0 && summary.studentsP < 5) || (summary.studentsE > 0 && summary.studentsE < 5)) && (
+            <div className="p-4 bg-amber-50 text-amber-800 rounded-2xl border border-amber-100 text-sm">
+              Uwaga: mała próbka w tej rundzie (Początkowa: {summary.studentsP}, Ewaluacyjna: {summary.studentsE}) — wynik procentowy może nie być reprezentatywny. Często dzieje się tak, gdy etykieta klasy (np. "7a") jest współdzielona przez uczniów z różnych roczników szkolnych, a wybrana runda wycina tylko wąski, nietypowy wycinek jednego z nich.
+            </div>
+          )}
+
           {!roundId ? (
             <div className="p-6 bg-amber-50 text-amber-800 rounded-2xl border border-amber-100 text-sm">
               Wybierz konkretną rundę/edycję powyżej, żeby zobaczyć rozkład trudności poszczególnych pytań — pytania mogą się różnić między edycjami, więc porównanie liczone jest zawsze w obrębie jednej rundy.
