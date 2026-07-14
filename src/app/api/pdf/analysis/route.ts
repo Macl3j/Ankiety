@@ -5,73 +5,7 @@ import { AnalysisTemplate, AnalysisComparisonRow } from '@/components/AnalysisTe
 import { supabaseAdmin } from '@/lib/supabaseClient';
 import { sanitizeText, asciiFilename } from '@/lib/pdfSanitize';
 import { findBestMatch } from '@/lib/textSimilarity';
-
-interface QAItem {
-  question: string;
-  answer: string;
-  points: number | null;
-}
-
-// Buduje liste {question, answer, points} dla odpowiedzi zaimportowanej spoza live-flow
-// (MS Forms lub arkusz rownoleglego systemu) - answers jest juz zdenormalizowane jako
-// {"q_1": {question, answer, points}, ...}.
-function buildQAFromImported(answers: Record<string, any>): QAItem[] {
-  return Object.keys(answers)
-    .sort((a, b) => {
-      const na = parseInt(a.replace('q_', ''), 10);
-      const nb = parseInt(b.replace('q_', ''), 10);
-      return na - nb;
-    })
-    .map((key) => ({
-      question: sanitizeText(answers[key].question),
-      answer: sanitizeText(
-        Array.isArray(answers[key].answer) ? answers[key].answer.join(', ') : answers[key].answer
-      ),
-      points: typeof answers[key].points === 'number' ? answers[key].points : null,
-    }));
-}
-
-// Buduje liste {question, answer, points} dla odpowiedzi live, laczac z biezaca tabela `questions`
-// (ten sam sposob liczenia punktow co /api/survey/submit).
-async function buildQAFromLive(surveyId: string, answers: Record<string, any>): Promise<QAItem[]> {
-  const { data: questions } = await supabaseAdmin
-    .from('questions')
-    .select('*')
-    .eq('survey_id', surveyId)
-    .order('order_index', { ascending: true });
-
-  if (!questions) return [];
-
-  return questions.map((q: any) => {
-    const userAnswer = answers[q.id];
-    const answerText = Array.isArray(userAnswer) ? userAnswer.join(', ') : (userAnswer ?? '');
-    let points: number | null = null;
-
-    if (Array.isArray(q.options)) {
-      const weight = typeof q.weight === 'number' && q.weight > 0 ? q.weight : 1;
-      const correctOptions = q.options.filter((o: any) => o.correct === true);
-
-      if (correctOptions.length > 0) {
-        if (q.type === 'SINGLE') {
-          points = userAnswer === correctOptions[0].text ? weight : 0;
-        } else if (q.type === 'MULTI') {
-          const userTexts = Array.isArray(userAnswer) ? [...userAnswer].sort() : [];
-          const correctTexts = correctOptions.map((o: any) => o.text).sort();
-          const isExactMatch =
-            correctTexts.length === userTexts.length &&
-            correctTexts.every((t: string, i: number) => t === userTexts[i]);
-          points = isExactMatch ? weight : 0;
-        }
-      }
-    }
-
-    return {
-      question: sanitizeText(q.text),
-      answer: sanitizeText(answerText.toString()),
-      points,
-    };
-  });
-}
+import { buildQAFromImported, buildQAFromLive } from '@/lib/buildQA';
 
 export async function GET(request: Request) {
   try {

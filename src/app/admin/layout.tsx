@@ -4,16 +4,17 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { 
-  LayoutDashboard, 
-  ClipboardList, 
-  QrCode, 
-  LogOut, 
-  Menu, 
-  X, 
+import {
+  LayoutDashboard,
+  ClipboardList,
+  QrCode,
+  LogOut,
+  Menu,
+  X,
   Sparkles,
   Lock,
-  LineChart
+  LineChart,
+  GraduationCap
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -128,8 +129,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span>Analityka</span>
           </Link>
 
-          <Link 
-            href="/admin/codes" 
+          <Link
+            href="/admin/analytics/klasy"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+              pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+            }`}
+          >
+            <GraduationCap className="w-5 h-5" />
+            <span>Ewaluacja Klas</span>
+          </Link>
+
+          <Link
+            href="/admin/codes"
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
               pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
             }`}
@@ -202,8 +213,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span>Analityka</span>
               </Link>
 
-              <Link 
-                href="/admin/codes" 
+              <Link
+                href="/admin/analytics/klasy"
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                  pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                }`}
+              >
+                <GraduationCap className="w-5 h-5" />
+                <span>Ewaluacja Klas</span>
+              </Link>
+
+              <Link
+                href="/admin/codes"
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
                   pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
