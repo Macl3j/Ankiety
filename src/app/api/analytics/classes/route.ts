@@ -76,7 +76,8 @@ export async function GET(request: Request) {
       .select('task_id');
     if (surveysErr) throw surveysErr;
 
-    const tasks = Array.from(new Set((surveys || []).map((s: any) => s.task_id))).sort((a, b) => a - b);
+    const taskIds: number[] = (surveys || []).map((s: any) => Number(s.task_id));
+    const uniqueTaskIds = Array.from(new Set(taskIds)).sort((a: number, b: number) => a - b);
 
     // ---------- 2. Kody uczniow: budowa filtrow szkola/klasa (znormalizowane) ----------
     const codes = await fetchAllRows<any>((from, to) =>
@@ -109,7 +110,7 @@ export async function GET(request: Request) {
           Array.from(m.values()).sort((a, b) => a.grade.localeCompare(b.grade) || a.letter.localeCompare(b.letter)),
         ])
       ),
-      tasks: tasks.map((t) => ({ taskId: t, label: `Runda ${t}` })),
+      tasks: uniqueTaskIds.map((t) => ({ taskId: t, label: `Runda ${t}` })),
     };
 
     if (!schoolParam || !gradeParam) {
