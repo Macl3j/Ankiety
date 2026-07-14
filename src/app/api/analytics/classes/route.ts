@@ -58,7 +58,9 @@ function aggregateByQuestion(items: QAItem[]): QuestionAgg[] {
 }
 
 function avgPercent(agg: QuestionAgg): number | null {
-  if (agg.n === 0 || agg.maxObserved === 0) return null;
+  if (agg.n === 0) return null; // naprawde brak odpowiedzi na to pytanie w tej grupie
+  if (agg.sumPoints === 0) return 0; // wszyscy odpowiedzieli na 0 pkt - to uczciwe 0%, nie "brak danych"
+  if (agg.maxObserved === 0) return null; // nie powinno wystapic razem z sumPoints>0, ale na wszelki wypadek
   return Math.round((agg.sumPoints / agg.n / agg.maxObserved) * 100);
 }
 
