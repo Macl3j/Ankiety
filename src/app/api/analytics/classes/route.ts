@@ -62,43 +62,15 @@ function avgPercent(agg: QuestionAgg): number | null {
   return Math.round((agg.sumPoints / agg.n / agg.maxObserved) * 100);
 }
 
-// Od 20.04.2026 uczniowie/nauczyciele w duzej mierze przeszli na rownolegly arkusz
-// Google ("System Ankiet 2025"), ktorego dane sa zaimportowane jako source='sheet_import'.
-// Zeby raportowanie odzwierciedlalo te dwa okresy administracji tej samej ankiety
-// (ten sam task_id=1), dzielimy go na dwie wybieralne "rundy" po dacie utworzenia -
-// bez zadnej zmiany danych w bazie, to czysto filtr w zapytaniu.
-const ROUND_SPLIT_DATE = '2026-04-20T00:00:00Z';
-
-interface Round {
-  roundId: string;
-  taskId: number;
-  label: string;
-  dateFrom?: string;
-  dateTo?: string;
-}
-
-function buildRounds(taskIds: number[]): Round[] {
-  const rounds: Round[] = [];
-  for (const t of taskIds) {
-    if (t === 1) {
-      rounds.push({ roundId: '1a', taskId: 1, label: 'Runda 1 (do 19.04.2026)', dateTo: ROUND_SPLIT_DATE });
-      rounds.push({ roundId: '1b', taskId: 1, label: 'Runda 2 (od 20.04.2026)', dateFrom: ROUND_SPLIT_DATE });
-    } else {
-      rounds.push({ roundId: String(t), taskId: t, label: `Runda ${t}` });
-    }
-  }
-  return rounds;
-}
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const schoolParam = searchParams.get('school');
     const gradeParam = searchParams.get('grade');
     const letterParam = searchParams.get('letter'); // 'all' albo konkretna litera
-    const roundIdParam = searchParams.get('round'); // konkretna runda albo brak (wszystkie)
+    const taskIdParam = searchParams.get('taskId'); // konkretna runda albo brak (wszystkie)
 
-    // ---------- 1. Lista dostepnych rund (task_id, ew. podzielony po dacie) ----------
+    // ---------- 1. Lista dostepnych rund (task_id) ----------
     const { data: surveys, error: surveysErr } = await supabaseAdmin
       .from('surveys')
       .select('task_id');
@@ -106,8 +78,6 @@ export async function GET(request: Request) {
 
     const taskIds: number[] = (surveys || []).map((s: any) => Number(s.task_id));
     const uniqueTaskIds = Array.from(new Set(taskIds)).sort((a: number, b: number) => a - b);
-    const rounds = buildRounds(uniqueTaskIds);
-    const selectedRound = roundIdParam ? rounds.find((r) => r.roundId === roundIdParam) || null : null;
 
     // ---------- 2. Kody uczniow: budowa filtrow szkola/klasa (znormalizowane) ----------
     const codes = await fetchAllRows<any>((from, to) =>
@@ -140,7 +110,7 @@ export async function GET(request: Request) {
           Array.from(m.values()).sort((a, b) => a.grade.localeCompare(b.grade) || a.letter.localeCompare(b.letter)),
         ])
       ),
-      rounds: rounds.map(({ roundId, label }) => ({ roundId, label })),
+      tasks: uniqueTaskIds.map((t) => ({ taskId: t, label: `Runda ${t}` })),
     };
 
     if (!schoolParam || !gradeParam) {
@@ -175,11 +145,7 @@ export async function GET(request: Request) {
         .from('responses')
         .select('id, survey_id, task_id, version, student_code, score, max_score, answers, source, created_at')
         .in('student_code', chunk);
-      if (selectedRound) {
-        q = q.eq('task_id', selectedRound.taskId);
-        if (selectedRound.dateFrom) q = q.gte('created_at', selectedRound.dateFrom);
-        if (selectedRound.dateTo) q = q.lt('created_at', selectedRound.dateTo);
-      }
+      if (taskIdParam) q = q.eq('task_id', Number(taskIdParam));
       const { data, error } = await q;
       if (error) throw error;
       responses.push(...(data || []));
@@ -214,7 +180,7 @@ export async function GET(request: Request) {
       participationRate: matchingCodes.length > 0 ? Math.round((bothPandE / matchingCodes.length) * 100) : 0,
     };
 
-    // ---------- 6. Trudnosc pytan - tylko gdy wybrana konkretna runda ----------
+    // ---------- 6. Trudnosc pytan - tylko gdy wybrana konkretna runda (taskId) ----------
     let questionDifficulty: any[] = [];
     // Cz. historycznych zaimportowanych odpowiedzi nigdy nie dostala backfillu punktow
     // per pytanie (answers ma tylko {question, answer}, bez `points`) - dla takich
@@ -222,7 +188,7 @@ export async function GET(request: Request) {
     // cichej pustki, ktora wyglada jak blad.
     let questionCoverage: { pWithData: number; pTotal: number; eWithData: number; eTotal: number } | null = null;
 
-    if (selectedRound) {
+    if (taskIdParam) {
       const questionsCache = new Map<string, any[]>();
       const getQuestionsForSurvey = async (surveyId: string) => {
         if (questionsCache.has(surveyId)) return questionsCache.get(surveyId)!;

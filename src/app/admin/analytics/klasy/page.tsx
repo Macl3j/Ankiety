@@ -11,7 +11,7 @@ import {
 interface Filters {
   schools: { name: string; count: number }[];
   classesBySchool: Record<string, { grade: string; letter: string; label: string; count: number }[]>;
-  rounds: { roundId: string; label: string }[];
+  tasks: { taskId: number; label: string }[];
 }
 
 interface Summary {
@@ -49,7 +49,7 @@ export default function ClassAnalyticsPage() {
 
   const [school, setSchool] = useState('');
   const [classKey, setClassKey] = useState(''); // `${grade}|${letter}`
-  const [roundId, setRoundId] = useState<string>(''); // '' = wszystkie rundy
+  const [taskId, setTaskId] = useState<string>(''); // '' = wszystkie rundy
 
   const [summary, setSummary] = useState<Summary | null>(null);
   const [questionDifficulty, setQuestionDifficulty] = useState<QuestionRow[]>([]);
@@ -87,7 +87,7 @@ export default function ClassAnalyticsPage() {
     setError(null);
 
     const params = new URLSearchParams({ school, grade, letter });
-    if (roundId) params.set('round', roundId);
+    if (taskId) params.set('taskId', taskId);
 
     fetch(`/api/analytics/classes?${params.toString()}`)
       .then((res) => res.json())
@@ -99,7 +99,7 @@ export default function ClassAnalyticsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoadingData(false));
-  }, [school, classKey, roundId]);
+  }, [school, classKey, taskId]);
 
   const sortedQuestions = useMemo(() => {
     const rows = [...questionDifficulty];
@@ -188,13 +188,13 @@ export default function ClassAnalyticsPage() {
           <label htmlFor="klasy-round-select" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Runda / Edycja</label>
           <select
             id="klasy-round-select"
-            value={roundId}
-            onChange={(e) => setRoundId(e.target.value)}
+            value={taskId}
+            onChange={(e) => setTaskId(e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
           >
             <option value="">Wszystkie rundy (bez trudności pytań)</option>
-            {filters?.rounds.map((r) => (
-              <option key={r.roundId} value={r.roundId}>{r.label}</option>
+            {filters?.tasks.map((t) => (
+              <option key={t.taskId} value={t.taskId}>{t.label}</option>
             ))}
           </select>
         </div>
@@ -239,13 +239,7 @@ export default function ClassAnalyticsPage() {
             />
           </div>
 
-          {roundId && ((summary.studentsP > 0 && summary.studentsP < 5) || (summary.studentsE > 0 && summary.studentsE < 5)) && (
-            <div className="p-4 bg-amber-50 text-amber-800 rounded-2xl border border-amber-100 text-sm">
-              Uwaga: mała próbka w tej rundzie (Początkowa: {summary.studentsP}, Ewaluacyjna: {summary.studentsE}) — wynik procentowy może nie być reprezentatywny. Często dzieje się tak, gdy etykieta klasy (np. "7a") jest współdzielona przez uczniów z różnych roczników szkolnych, a wybrana runda wycina tylko wąski, nietypowy wycinek jednego z nich.
-            </div>
-          )}
-
-          {!roundId ? (
+          {!taskId ? (
             <div className="p-6 bg-amber-50 text-amber-800 rounded-2xl border border-amber-100 text-sm">
               Wybierz konkretną rundę/edycję powyżej, żeby zobaczyć rozkład trudności poszczególnych pytań — pytania mogą się różnić między edycjami, więc porównanie liczone jest zawsze w obrębie jednej rundy.
             </div>
