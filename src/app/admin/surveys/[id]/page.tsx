@@ -381,7 +381,7 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
           </button>
           <div className="flex items-center gap-2">
             <span className={`text-[10px] px-2.5 py-0.5 rounded font-bold uppercase ${
-              survey.version === 'P' ? 'bg-[#c5a059]/10 text-[#c5a059]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
+              survey.version === 'P' ? 'bg-[#c5a059]/10 text-[#8a6d3f]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
             }`}>
               Zadanie {survey.task_id} &bull; {survey.version === 'P' ? 'Początkowa (P)' : 'Ewaluacyjna (E)'}
             </span>
@@ -516,7 +516,7 @@ export default function EditSurvey({ params }: { params: Promise<{ id: string }>
                   <button
                     type="button"
                     onClick={addOptionField}
-                    className="text-xs text-[#c5a059] font-bold hover:underline"
+                    className="text-xs text-[#8a6d3f] font-bold hover:underline"
                   >
                     + Dodaj opcję
                   </button>

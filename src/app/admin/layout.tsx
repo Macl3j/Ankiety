@@ -99,8 +99,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
-          <Link 
-            href="/admin/dashboard" 
+          <Link
+            href="/admin/dashboard"
+            aria-current={pathname === '/admin/dashboard' ? 'page' : undefined}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
               pathname === '/admin/dashboard' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
             }`}
@@ -109,8 +110,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span>Dashboard KPI</span>
           </Link>
 
-          <Link 
-            href="/admin/surveys" 
+          <Link
+            href="/admin/surveys"
+            aria-current={pathname.startsWith('/admin/surveys') ? 'page' : undefined}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
               pathname.startsWith('/admin/surveys') ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
             }`}
@@ -119,8 +121,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span>Zarządzaj Ankietami</span>
           </Link>
 
-          <Link 
-            href="/admin/analytics" 
+          <Link
+            href="/admin/analytics"
+            aria-current={pathname === '/admin/analytics' ? 'page' : undefined}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
               pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
             }`}
@@ -131,6 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <Link
             href="/admin/analytics/klasy"
+            aria-current={pathname === '/admin/analytics/klasy' ? 'page' : undefined}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
               pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
             }`}
@@ -141,6 +145,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <Link
             href="/admin/codes"
+            aria-current={pathname === '/admin/codes' ? 'page' : undefined}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
               pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
             }`}
@@ -174,15 +179,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Sparkles className="w-5 h-5 fill-current" />
                 <span>Admin Panel</span>
               </div>
-              <button onClick={() => setSidebarOpen(false)}>
+              <button onClick={() => setSidebarOpen(false)} aria-label="Zamknij menu">
                 <X className="w-6 h-6 text-gray-400 hover:text-white" />
               </button>
             </div>
 
             <nav className="flex-1 p-4 space-y-2">
-              <Link 
-                href="/admin/dashboard" 
+              <Link
+                href="/admin/dashboard"
                 onClick={() => setSidebarOpen(false)}
+                aria-current={pathname === '/admin/dashboard' ? 'page' : undefined}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
                   pathname === '/admin/dashboard' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
                 }`}
@@ -191,9 +197,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span>Dashboard KPI</span>
               </Link>
 
-              <Link 
-                href="/admin/surveys" 
+              <Link
+                href="/admin/surveys"
                 onClick={() => setSidebarOpen(false)}
+                aria-current={pathname.startsWith('/admin/surveys') ? 'page' : undefined}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
                   pathname.startsWith('/admin/surveys') ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
                 }`}
@@ -202,9 +209,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span>Zarządzaj Ankietami</span>
               </Link>
 
-              <Link 
-                href="/admin/analytics" 
+              <Link
+                href="/admin/analytics"
                 onClick={() => setSidebarOpen(false)}
+                aria-current={pathname === '/admin/analytics' ? 'page' : undefined}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
                   pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
                 }`}
@@ -216,6 +224,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 href="/admin/analytics/klasy"
                 onClick={() => setSidebarOpen(false)}
+                aria-current={pathname === '/admin/analytics/klasy' ? 'page' : undefined}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
                   pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
                 }`}
@@ -227,6 +236,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 href="/admin/codes"
                 onClick={() => setSidebarOpen(false)}
+                aria-current={pathname === '/admin/codes' ? 'page' : undefined}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
                   pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
                 }`}
@@ -256,7 +266,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Sparkles className="w-5 h-5 fill-current" />
             <span>Admin</span>
           </div>
-          <button onClick={() => setSidebarOpen(true)}>
+          <button onClick={() => setSidebarOpen(true)} aria-label="Otwórz menu">
             <Menu className="w-6 h-6 text-white" />
           </button>
         </header>

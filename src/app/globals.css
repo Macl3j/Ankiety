@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Uzytkownicy z preferencja "ogranicz ruch" (dostepnosc) - skracamy animacje
+   (animate-in/fade-in/slide-in/animate-spin z Tailwind) do prawie zerowego czasu
+   zamiast je calkowicie wylaczac, zeby np. spinner ladowania nadal byl widoczny. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -260,7 +260,7 @@ export default function ManageSurveys() {
                     <td className="py-4 text-gray-500 font-medium">{s.group}</td>
                     <td className="py-4 text-center">
                       <span className={`inline-block text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
-                        s.version === 'P' ? 'bg-[#c5a059]/10 text-[#c5a059]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
+                        s.version === 'P' ? 'bg-[#c5a059]/10 text-[#8a6d3f]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
                       }`}>
                         {s.version === 'P' ? 'Początkowa' : 'Ewaluacyjna'}
                       </span>

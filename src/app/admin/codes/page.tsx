@@ -328,8 +328,9 @@ export default function ManageCodes() {
         {!showBulk ? (
           <form onSubmit={handleAddSingle} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Imię</label>
+              <label htmlFor="single-first-name" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Imię</label>
               <input
+                id="single-first-name"
                 type="text"
                 placeholder="np. Alan"
                 value={firstName}
@@ -338,8 +339,9 @@ export default function ManageCodes() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Nazwisko</label>
+              <label htmlFor="single-last-name" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Nazwisko</label>
               <input
+                id="single-last-name"
                 type="text"
                 placeholder="np. Sternalski"
                 value={lastName}
@@ -348,8 +350,9 @@ export default function ManageCodes() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Szkoła</label>
+              <label htmlFor="single-school" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Szkoła</label>
               <input
+                id="single-school"
                 type="text"
                 placeholder="np. SP5 Gniezno"
                 value={school}
@@ -358,8 +361,9 @@ export default function ManageCodes() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Klasa</label>
+              <label htmlFor="single-class" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Klasa</label>
               <input
+                id="single-class"
                 type="text"
                 placeholder="np. 5a"
                 value={className}
@@ -380,8 +384,9 @@ export default function ManageCodes() {
           <form onSubmit={handleAddBulk} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Szkoła (Dla wszystkich)</label>
+                <label htmlFor="bulk-school" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Szkoła (Dla wszystkich)</label>
                 <input
+                  id="bulk-school"
                   type="text"
                   placeholder="np. SP5 Gniezno"
                   value={school}
@@ -390,8 +395,9 @@ export default function ManageCodes() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Klasa (Dla wszystkich)</label>
+                <label htmlFor="bulk-class" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Klasa (Dla wszystkich)</label>
                 <input
+                  id="bulk-class"
                   type="text"
                   placeholder="np. 5a"
                   value={className}
@@ -402,8 +408,9 @@ export default function ManageCodes() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider block">Lista Uczniów (Imię i Nazwisko w nowej linijce)</label>
+              <label htmlFor="bulk-students-list" className="text-xs text-gray-400 font-bold uppercase tracking-wider block">Lista Uczniów (Imię i Nazwisko w nowej linijce)</label>
               <textarea
+                id="bulk-students-list"
                 placeholder="Jan Kowalski&#10;Anna Nowak&#10;Michał Wiśniewski"
                 value={bulkInput}
                 onChange={(e) => setBulkInput(e.target.value)}
@@ -432,7 +439,9 @@ export default function ManageCodes() {
           </h3>
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <label htmlFor="codes-search-input" className="sr-only">Filtruj kody uczniów</label>
             <input
+              id="codes-search-input"
               type="text"
               placeholder="Filtruj po imieniu, szkole, kodzie..."
               value={search}
@@ -469,7 +478,7 @@ export default function ManageCodes() {
               ) : (
                 filteredCodes.map((c) => (
                   <tr key={c.code} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="py-4 font-mono font-bold text-[#c5a059] text-base">{c.code}</td>
+                    <td className="py-4 font-mono font-bold text-[#8a6d3f] text-base">{c.code}</td>
                     <td className="py-4 font-semibold text-[#1a2a3a]">{c.first_name} {c.last_name}</td>
                     <td className="py-4 text-gray-500">
                       <div className="flex items-center gap-1.5">
@@ -481,6 +490,7 @@ export default function ManageCodes() {
                     <td className="py-4 text-center">
                       <button
                         onClick={() => handleDelete(c.code)}
+                        aria-label={`Usuń kod ${c.code} (${c.first_name} ${c.last_name})`}
                         className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors inline-flex"
                       >
                         <Trash2 className="w-4 h-4" />

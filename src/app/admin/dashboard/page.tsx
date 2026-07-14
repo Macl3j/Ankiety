@@ -269,7 +269,9 @@ export default function AdminDashboard() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
+            <label htmlFor="responses-search-input" className="sr-only">Szukaj wypełnionych ankiet</label>
             <input
+              id="responses-search-input"
               type="text"
               placeholder="Szukaj po imieniu, nazwisku lub kodzie..."
               value={searchQuery}
@@ -335,7 +337,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 text-center">
                         <span className={`inline-block text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
-                          r.version === 'P' ? 'bg-[#c5a059]/10 text-[#c5a059]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
+                          r.version === 'P' ? 'bg-[#c5a059]/10 text-[#8a6d3f]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
                         }`}>
                           {r.version === 'P' ? 'Początkowa' : 'Ewaluacyjna'}
                         </span>
@@ -401,6 +403,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                aria-label="Poprzednia strona"
                 className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4 text-gray-600" />
@@ -408,6 +411,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
+                aria-label="Następna strona"
                 className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-4 h-4 text-gray-600" />
@@ -436,12 +440,13 @@ function SortableHeader({
   center?: boolean;
 }) {
   const isActive = sortColumn === column;
+  const ariaSort = isActive ? (sortAsc ? 'ascending' : 'descending') : 'none';
   return (
-    <th className={`py-4 font-bold select-none ${center ? 'text-center' : ''}`}>
+    <th className={`py-4 font-bold select-none ${center ? 'text-center' : ''}`} aria-sort={ariaSort as any}>
       <button
         type="button"
         onClick={() => onSort(column)}
-        className={`inline-flex items-center gap-1 hover:text-[#1a2a3a] transition-colors ${isActive ? 'text-[#1a2a3a]' : ''}`}
+        className={`inline-flex items-center gap-1 hover:text-[#1a2a3a] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a] focus-visible:ring-offset-1 rounded ${isActive ? 'text-[#1a2a3a]' : ''}`}
       >
         <span>{label}</span>
         {isActive ? (

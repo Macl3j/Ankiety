@@ -197,7 +197,7 @@ export default function StudentPortal() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fcfcf9] text-[#1a2a3a] flex flex-col items-center justify-center p-4">
+    <main id="main-content" className="min-h-screen bg-[#fcfcf9] text-[#1a2a3a] flex flex-col items-center justify-center p-4">
       {/* 1. KROK: LOGOWANIE KODEM */}
       {step === 'login' && (
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center transition-all duration-300 hover:shadow-2xl">
@@ -210,7 +210,9 @@ export default function StudentPortal() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
+              <label htmlFor="student-code-input" className="sr-only">Kod dostępu</label>
               <input
+                id="student-code-input"
                 type="text"
                 placeholder="Napisz Twój kod (np. ALAN5A)"
                 value={code}
@@ -230,7 +232,7 @@ export default function StudentPortal() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-[#1a2a3a] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:bg-[#2b3c4f] active:scale-95 transition-all duration-300 disabled:opacity-50"
+              className="w-full py-4 bg-[#1a2a3a] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:bg-[#2b3c4f] active:scale-95 transition-all duration-300 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] focus-visible:ring-offset-2"
             >
               <span>{loading ? 'Logowanie...' : 'Rozpocznij'}</span>
               <ArrowRight className="w-5 h-5" />
@@ -242,9 +244,10 @@ export default function StudentPortal() {
       {/* 2. KROK: DASHBOARD UCZNIA */}
       {step === 'dashboard' && student && (
         <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-100 p-8 transition-all duration-300">
+          <h1 className="sr-only">Pulpit ucznia</h1>
           <div className="flex justify-between items-start border-b border-gray-100 pb-6 mb-6">
             <div>
-              <div className="text-[#c5a059] font-serif text-lg italic mb-1">Witaj,</div>
+              <div className="text-[#8a6d3f] font-serif text-lg italic mb-1">Witaj,</div>
               <h2 className="text-3xl font-serif font-bold text-[#1a2a3a]">{student.firstName} {student.lastName}</h2>
             </div>
             <div className="bg-[#f7f5f0] border border-[#e2dccf] text-[#1a2a3a] px-4 py-2 rounded-lg font-mono text-sm font-bold">
@@ -291,7 +294,7 @@ export default function StudentPortal() {
                 >
                   <div className="mb-4 sm:mb-0">
                     <span className={`inline-block text-[10px] px-2 py-0.5 rounded font-bold uppercase mr-2 ${
-                      survey.version === 'P' ? 'bg-[#c5a059]/10 text-[#c5a059]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
+                      survey.version === 'P' ? 'bg-[#c5a059]/10 text-[#8a6d3f]' : 'bg-[#1a2a3a]/10 text-[#1a2a3a]'
                     }`}>
                       {survey.version === 'P' ? 'Początkowa (P)' : 'Ewaluacyjna (E)'}
                     </span>
@@ -312,7 +315,7 @@ export default function StudentPortal() {
                   ) : (
                     <button
                       onClick={() => startSurvey(survey)}
-                      className="px-5 py-2.5 bg-[#1a2a3a] hover:bg-[#2b3c4f] text-white font-medium rounded-lg text-sm flex items-center justify-center gap-1.5 transition-all duration-300"
+                      className="px-5 py-2.5 bg-[#1a2a3a] hover:bg-[#2b3c4f] text-white font-medium rounded-lg text-sm flex items-center justify-center gap-1.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] focus-visible:ring-offset-2"
                     >
                       <span>Wypełnij</span>
                       <ArrowRight className="w-4 h-4" />
@@ -328,15 +331,16 @@ export default function StudentPortal() {
       {/* 3. KROK: FORMULARZ ANKIETY */}
       {step === 'survey' && activeSurvey && (
         <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-100 p-8 transition-all duration-300">
-          <button 
+          <h1 className="sr-only">Wypełnianie ankiety</h1>
+          <button
             onClick={() => setStep('dashboard')}
-            className="flex items-center gap-1 text-gray-400 hover:text-[#1a2a3a] text-sm mb-6 transition-colors"
+            className="flex items-center gap-1 text-gray-400 hover:text-[#1a2a3a] text-sm mb-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] focus-visible:ring-offset-2 rounded"
           >
             <ArrowLeft className="w-4 h-4" />
             Wróć do listy
           </button>
 
-          <span className="text-xs text-[#c5a059] uppercase tracking-wider font-bold">Wypełniasz ankietę:</span>
+          <span className="text-xs text-[#1a2a3a] uppercase tracking-wider font-bold">Wypełniasz ankietę:</span>
           <h2 className="text-3xl font-serif font-bold text-[#1a2a3a] mt-1 mb-6 border-b border-gray-100 pb-4">
             {activeSurvey.title}
           </h2>
@@ -344,9 +348,9 @@ export default function StudentPortal() {
           <div className="space-y-8 mb-8">
             {questions.map((q, idx) => (
               <div key={q.id} className="p-6 bg-gray-50 rounded-xl space-y-4 border border-gray-100">
-                <h4 className="font-serif font-bold text-lg text-[#1a2a3a] leading-snug">
+                <h3 className="font-serif font-bold text-lg text-[#1a2a3a] leading-snug">
                   {idx + 1}. {q.text}
-                </h4>
+                </h3>
 
                 {/* Wyświetlanie zdjęcia pytania (ilustracja) */}
                 {q.image_url && (
@@ -357,7 +361,8 @@ export default function StudentPortal() {
 
                 {/* OPCJA: SINGLE (Jednokrotny wybór) */}
                 {q.type === 'SINGLE' && (
-                  <div className="space-y-2.5">
+                  <fieldset className="space-y-2.5 border-0 p-0 m-0">
+                    <legend className="sr-only">{q.text}</legend>
                     {q.options?.map((opt: any, oIdx: number) => {
                       const text = typeof opt === 'object' ? opt.text : opt;
                       return (
@@ -384,12 +389,13 @@ export default function StudentPortal() {
                         </label>
                       );
                     })}
-                  </div>
+                  </fieldset>
                 )}
 
                 {/* OPCJA: MULTI (Wielokrotny wybór) */}
                 {q.type === 'MULTI' && (
-                  <div className="space-y-2.5">
+                  <fieldset className="space-y-2.5 border-0 p-0 m-0">
+                    <legend className="sr-only">{q.text}</legend>
                     {q.options?.map((opt: any, oIdx: number) => {
                       const text = typeof opt === 'object' ? opt.text : opt;
                       const currentAnswers = Array.isArray(answers[q.id]) ? answers[q.id] : [];
@@ -427,19 +433,22 @@ export default function StudentPortal() {
                         </label>
                       );
                     })}
-                  </div>
+                  </fieldset>
                 )}
 
                 {/* OPCJA: LIKERT (Skala 1-5) */}
                 {q.type === 'LIKERT' && (
-                  <div className="flex justify-between items-center max-w-md mx-auto pt-2">
+                  <div role="radiogroup" aria-label={q.text} className="flex justify-between items-center max-w-md mx-auto pt-2">
                     {[1, 2, 3, 4, 5].map((val) => (
                       <button
                         key={val}
+                        type="button"
+                        role="radio"
+                        aria-checked={answers[q.id] === val}
                         onClick={() => handleAnswerChange(q.id, val)}
-                        className={`w-12 h-12 rounded-full font-bold flex items-center justify-center border transition-all ${
-                          answers[q.id] === val 
-                            ? 'bg-[#1a2a3a] border-[#1a2a3a] text-white scale-110 shadow-md' 
+                        className={`w-12 h-12 rounded-full font-bold flex items-center justify-center border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a] focus-visible:ring-offset-2 ${
+                          answers[q.id] === val
+                            ? 'bg-[#1a2a3a] border-[#1a2a3a] text-white scale-110 shadow-md'
                             : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400'
                         }`}
                       >
@@ -452,7 +461,9 @@ export default function StudentPortal() {
                 {/* OPCJA: TEXT (Pytanie otwarte) */}
                 {q.type === 'TEXT' && (
                   <div>
+                    <label htmlFor={`text-answer-${q.id}`} className="sr-only">{q.text}</label>
                     <textarea
+                      id={`text-answer-${q.id}`}
                       placeholder="Wpisz swoją odpowiedź..."
                       value={answers[q.id] || ''}
                       onChange={(e) => handleAnswerChange(q.id, e.target.value)}
@@ -490,7 +501,7 @@ export default function StudentPortal() {
           <button
             onClick={submitSurvey}
             disabled={loading}
-            className="w-full py-4 bg-[#1a2a3a] hover:bg-[#2b3c4f] text-white font-semibold rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all duration-300 disabled:opacity-50"
+            className="w-full py-4 bg-[#1a2a3a] hover:bg-[#2b3c4f] text-white font-semibold rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all duration-300 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] focus-visible:ring-offset-2"
           >
             <FileCheck className="w-5 h-5" />
             <span>{loading ? 'Przetwarzanie...' : 'Wyślij ankietę'}</span>
@@ -501,6 +512,7 @@ export default function StudentPortal() {
       {/* 4. KROK: PODSUMOWANIE (EKRAN SUKCESU Z CERTYFIKATEM) */}
       {step === 'summary' && summary && student && activeSurvey && (
         <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center transition-all duration-300">
+          <h1 className="sr-only">Podsumowanie ankiety</h1>
           <div className="mx-auto w-16 h-16 bg-emerald-50 text-emerald-600 flex items-center justify-center rounded-full mb-6 relative">
             <CheckCircle2 className="w-10 h-10" />
             <div className="absolute -top-1 -right-1 text-yellow-500 animate-bounce">
@@ -512,12 +524,12 @@ export default function StudentPortal() {
           <p className="text-gray-500 mb-8 font-light">Twoja ankieta została pomyślnie zapisana w bazie projektu.</p>
 
           <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mb-8 text-left space-y-4">
-            <h4 className="font-serif font-bold text-[#1a2a3a] text-lg border-b border-gray-200 pb-2 flex justify-between">
+            <h3 className="font-serif font-bold text-[#1a2a3a] text-lg border-b border-gray-200 pb-2 flex justify-between">
               <span>Podsumowanie Wyników</span>
-              <span className="text-xs text-[#c5a059] uppercase tracking-wider font-bold mt-1">
+              <span className="text-xs text-[#1a2a3a] uppercase tracking-wider font-bold mt-1">
                 {activeSurvey.version === 'P' ? 'Początkowa' : 'Ewaluacyjna'}
               </span>
-            </h4>
+            </h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-white border border-gray-100 rounded-xl text-center">
@@ -547,7 +559,7 @@ export default function StudentPortal() {
                 href={summary.certUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-4 bg-[#c5a059] hover:bg-[#b08b47] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:shadow-lg active:scale-95 transition-all duration-300"
+                className="w-full py-4 bg-[#c5a059] hover:bg-[#b08b47] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:shadow-lg active:scale-95 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a] focus-visible:ring-offset-2"
               >
                 <Download className="w-5 h-5" />
                 <span>Pobierz Certyfikat PDF</span>
@@ -559,7 +571,7 @@ export default function StudentPortal() {
                 href={`/api/pdf/certificate?responseId=${summary.id}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-4 bg-[#c5a059] hover:bg-[#b08b47] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:shadow-lg active:scale-95 transition-all duration-300"
+                className="w-full py-4 bg-[#c5a059] hover:bg-[#b08b47] text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:shadow-lg active:scale-95 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a] focus-visible:ring-offset-2"
               >
                 <Download className="w-5 h-5" />
                 <span>Pobierz Certyfikat PDF</span>
@@ -568,7 +580,7 @@ export default function StudentPortal() {
 
             <button
               onClick={() => setStep('dashboard')}
-              className="w-full py-4 bg-gray-100 hover:bg-gray-200 text-[#1a2a3a] font-semibold rounded-xl active:scale-95 transition-all duration-300"
+              className="w-full py-4 bg-gray-100 hover:bg-gray-200 text-[#1a2a3a] font-semibold rounded-xl active:scale-95 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a] focus-visible:ring-offset-2"
             >
               Wróć do Pulpitu
             </button>

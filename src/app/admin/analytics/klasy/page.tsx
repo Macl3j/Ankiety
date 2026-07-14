@@ -151,8 +151,9 @@ export default function ClassAnalyticsPage() {
       {/* FILTRY */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-1">
-          <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Szkoła</label>
+          <label htmlFor="klasy-school-select" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Szkoła</label>
           <select
+            id="klasy-school-select"
             value={school}
             onChange={(e) => { setSchool(e.target.value); setClassKey(''); }}
             disabled={loadingFilters}
@@ -166,8 +167,9 @@ export default function ClassAnalyticsPage() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Klasa</label>
+          <label htmlFor="klasy-class-select" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Klasa</label>
           <select
+            id="klasy-class-select"
             value={classKey}
             onChange={(e) => setClassKey(e.target.value)}
             disabled={!school}
@@ -183,8 +185,9 @@ export default function ClassAnalyticsPage() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Runda / Edycja</label>
+          <label htmlFor="klasy-round-select" className="text-xs text-gray-400 font-bold uppercase tracking-wider">Runda / Edycja</label>
           <select
+            id="klasy-round-select"
             value={roundId}
             onChange={(e) => setRoundId(e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
@@ -372,12 +375,13 @@ function SortableHeader({
   center?: boolean;
 }) {
   const isActive = sortColumn === column;
+  const ariaSort = isActive ? (sortAsc ? 'ascending' : 'descending') : 'none';
   return (
-    <th className={`py-4 font-bold select-none ${center ? 'text-center' : ''}`}>
+    <th className={`py-4 font-bold select-none ${center ? 'text-center' : ''}`} aria-sort={ariaSort as any}>
       <button
         type="button"
         onClick={() => onSort(column)}
-        className={`inline-flex items-center gap-1 hover:text-[#1a2a3a] transition-colors ${isActive ? 'text-[#1a2a3a]' : ''}`}
+        className={`inline-flex items-center gap-1 hover:text-[#1a2a3a] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a] focus-visible:ring-offset-1 rounded ${isActive ? 'text-[#1a2a3a]' : ''}`}
       >
         <span>{label}</span>
         {isActive ? (sortAsc ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 text-gray-300" />}
