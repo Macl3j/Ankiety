@@ -182,6 +182,11 @@ export async function GET(request: Request) {
 
     // ---------- 6. Trudnosc pytan - tylko gdy wybrana konkretna runda (taskId) ----------
     let questionDifficulty: any[] = [];
+    // Cz. historycznych zaimportowanych odpowiedzi nigdy nie dostala backfillu punktow
+    // per pytanie (answers ma tylko {question, answer}, bez `points`) - dla takich
+    // wierszy questionDifficulty ich pomija, wiec pokazujemy to wprost w UI zamiast
+    // cichej pustki, ktora wyglada jak blad.
+    let questionCoverage: { pWithData: number; pTotal: number; eWithData: number; eTotal: number } | null = null;
 
     if (taskIdParam) {
       const questionsCache = new Map<string, any[]>();
@@ -196,21 +201,27 @@ export async function GET(request: Request) {
         return data || [];
       };
 
-      const buildAllQA = async (rows: any[]): Promise<QAItem[]> => {
-        const out: QAItem[] = [];
+      const buildAllQA = async (rows: any[]): Promise<{ items: QAItem[]; withDataCount: number }> => {
+        const items: QAItem[] = [];
+        let withDataCount = 0;
         for (const r of rows) {
+          let qa: QAItem[];
           if (r.source !== 'live') {
-            out.push(...buildQAFromImported(r.answers));
+            qa = buildQAFromImported(r.answers);
           } else {
             const preloaded = await getQuestionsForSurvey(r.survey_id);
-            out.push(...(await buildQAFromLive(r.survey_id, r.answers, preloaded)));
+            qa = await buildQAFromLive(r.survey_id, r.answers, preloaded);
           }
+          if (qa.some((q) => q.points !== null)) withDataCount += 1;
+          items.push(...qa);
         }
-        return out;
+        return { items, withDataCount };
       };
 
-      const qaAllP = await buildAllQA(pResponses);
-      const qaAllE = await buildAllQA(eResponses);
+      const { items: qaAllP, withDataCount: pWithData } = await buildAllQA(pResponses);
+      const { items: qaAllE, withDataCount: eWithData } = await buildAllQA(eResponses);
+
+      questionCoverage = { pWithData, pTotal: pResponses.length, eWithData, eTotal: eResponses.length };
 
       const aggP = aggregateByQuestion(qaAllP);
       const aggE = aggregateByQuestion(qaAllE);
@@ -232,7 +243,7 @@ export async function GET(request: Request) {
         .sort((a, b) => (a.avgPercentE ?? 100) - (b.avgPercentE ?? 100));
     }
 
-    return NextResponse.json({ filters, summary, questionDifficulty });
+    return NextResponse.json({ filters, summary, questionDifficulty, questionCoverage });
   } catch (error: any) {
     console.error('Analytics classes error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -34,6 +34,13 @@ interface QuestionRow {
   nE: number;
 }
 
+interface QuestionCoverage {
+  pWithData: number;
+  pTotal: number;
+  eWithData: number;
+  eTotal: number;
+}
+
 type SortColumn = 'question' | 'avgPercentP' | 'avgPercentE' | 'delta';
 
 export default function ClassAnalyticsPage() {
@@ -46,6 +53,7 @@ export default function ClassAnalyticsPage() {
 
   const [summary, setSummary] = useState<Summary | null>(null);
   const [questionDifficulty, setQuestionDifficulty] = useState<QuestionRow[]>([]);
+  const [questionCoverage, setQuestionCoverage] = useState<QuestionCoverage | null>(null);
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,6 +78,7 @@ export default function ClassAnalyticsPage() {
     if (!school || !classKey) {
       setSummary(null);
       setQuestionDifficulty([]);
+      setQuestionCoverage(null);
       return;
     }
     const [grade, letter] = classKey.split('|');
@@ -86,6 +95,7 @@ export default function ClassAnalyticsPage() {
         if (json.error) throw new Error(json.error);
         setSummary(json.summary);
         setQuestionDifficulty(json.questionDifficulty || []);
+        setQuestionCoverage(json.questionCoverage || null);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoadingData(false));
@@ -236,6 +246,13 @@ export default function ClassAnalyticsPage() {
             </div>
           ) : (
             <>
+              {questionCoverage && (questionCoverage.pWithData < questionCoverage.pTotal || questionCoverage.eWithData < questionCoverage.eTotal) && (
+                <div className="p-4 bg-blue-50 text-blue-800 rounded-2xl border border-blue-100 text-sm">
+                  Uwaga: część historycznych odpowiedzi nie ma zapisanych punktów per pytanie (starszy import bez pełnego backfillu) — wykres i tabela poniżej liczone są tylko z odpowiedzi, które je mają:
+                  {' '}Początkowa {questionCoverage.pWithData}/{questionCoverage.pTotal}, Ewaluacyjna {questionCoverage.eWithData}/{questionCoverage.eTotal}.
+                </div>
+              )}
+
               {/* WYRÓŻNIONE */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <HighlightList title="Najtrudniejsze pytania (najniższy % w Ewaluacyjnej)" rows={hardestQuestions} metric="avgPercentE" />

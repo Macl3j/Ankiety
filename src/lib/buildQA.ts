@@ -14,6 +14,8 @@ export interface QAItem {
 
 // Odpowiedzi zaimportowane spoza live-flow (MS Forms lub arkusz rownoleglego systemu -
 // source != 'live') maja answers juz zdenormalizowane jako {"q_1": {question, answer, points}, ...}.
+// Niekt ore najstarsze zaimportowane wiersze maja pierwsza pozycje = wewnetrzna kolumne
+// "Id" z pliku MS Forms (artefakt importu, nie prawdziwe pytanie ankiety) - pomijamy ja.
 export function buildQAFromImported(answers: Record<string, any>): QAItem[] {
   return Object.keys(answers)
     .sort((a, b) => {
@@ -21,6 +23,7 @@ export function buildQAFromImported(answers: Record<string, any>): QAItem[] {
       const nb = parseInt(b.replace('q_', ''), 10);
       return na - nb;
     })
+    .filter((key) => answers[key].question !== 'Id')
     .map((key) => ({
       question: sanitizeText(answers[key].question),
       answer: sanitizeText(
