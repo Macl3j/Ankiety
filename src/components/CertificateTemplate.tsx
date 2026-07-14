@@ -1,6 +1,6 @@
 // CertificateTemplate.tsx
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer';
 import path from 'path';
 
 // Zabezpieczenie przed środowiskiem przeglądarki (w razie kompilacji po stronie klienta)
@@ -43,6 +43,11 @@ if (isServer) {
     ]
   });
 }
+
+// Belka z logotypami dofinansowania UE - wymagana na kazdym generowanym dokumencie
+const footerBannerSrc = isServer
+  ? path.join(process.cwd(), 'public', 'footer-eu-banner.png')
+  : '/footer-eu-banner.png';
 
 // Definicje stylów dla @react-pdf
 const styles = StyleSheet.create({
@@ -198,6 +203,13 @@ const styles = StyleSheet.create({
     color: '#1a2a3a',
     marginTop: 2,
   },
+  footerBannerSection: {
+    alignItems: 'center',
+  },
+  footerBanner: {
+    width: 220,
+    height: 21,
+  },
 });
 
 interface CertificateData {
@@ -274,6 +286,11 @@ export const CertificateTemplate = ({
           <View style={styles.dateSection}>
             <Text style={styles.dateLabel}>Data wystawienia:</Text>
             <Text style={styles.dateValue}>{dateStr}</Text>
+          </View>
+
+          {/* Belka dofinansowania UE */}
+          <View style={styles.footerBannerSection}>
+            <Image src={footerBannerSrc} style={styles.footerBanner} />
           </View>
         </View>
       </View>

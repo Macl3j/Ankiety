@@ -1,6 +1,6 @@
 // AnalysisTemplate.tsx
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer';
 import path from 'path';
 
 // Zabezpieczenie przed środowiskiem przeglądarki (w razie kompilacji po stronie klienta)
@@ -26,6 +26,11 @@ if (isServer) {
   });
 }
 
+// Belka z logotypami dofinansowania UE - wymagana na kazdym generowanym dokumencie
+const footerBannerSrc = isServer
+  ? path.join(process.cwd(), 'public', 'footer-eu-banner.png')
+  : '/footer-eu-banner.png';
+
 const DELTA_COLORS: Record<string, string> = {
   green: '#2e7d32',
   red: '#c62828',
@@ -35,7 +40,10 @@ const DELTA_COLORS: Record<string, string> = {
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    paddingTop: 40,
+    paddingLeft: 40,
+    paddingRight: 40,
+    paddingBottom: 70,
     fontFamily: 'Roboto',
     fontSize: 11,
     lineHeight: 1.4,
@@ -127,6 +135,13 @@ const styles = StyleSheet.create({
   cellBold: {
     fontSize: 8,
     fontWeight: 'bold',
+  },
+  footerBanner: {
+    position: 'absolute',
+    bottom: 15,
+    left: 40,
+    width: 260,
+    height: 25,
   },
 });
 
@@ -234,6 +249,8 @@ export const AnalysisTemplate: React.FC<AnalysisTemplateProps> = ({
             );
           })}
         </View>
+
+        <Image src={footerBannerSrc} style={styles.footerBanner} fixed />
       </Page>
     </Document>
   );

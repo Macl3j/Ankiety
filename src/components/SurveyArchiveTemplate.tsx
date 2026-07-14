@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer';
 import path from 'path';
 
 // Zabezpieczenie przed środowiskiem przeglądarki (w razie kompilacji po stronie klienta)
@@ -7,7 +7,7 @@ const isServer = typeof window === 'undefined';
 
 if (isServer) {
   const fontsDir = path.join(process.cwd(), 'public', 'fonts');
-  
+
   // Rejestracja czcionek z public/fonts (używamy woff, które zostały pobrane)
   Font.register({
     family: 'Roboto',
@@ -26,9 +26,17 @@ if (isServer) {
   });
 }
 
+// Belka z logotypami dofinansowania UE - wymagana na kazdym generowanym dokumencie
+const footerBannerSrc = isServer
+  ? path.join(process.cwd(), 'public', 'footer-eu-banner.png')
+  : '/footer-eu-banner.png';
+
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    paddingTop: 40,
+    paddingLeft: 40,
+    paddingRight: 40,
+    paddingBottom: 70,
     fontFamily: 'Roboto',
     fontSize: 11,
     lineHeight: 1.5,
@@ -113,7 +121,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     fontFamily: 'Roboto',
-  }
+  },
+  footerBanner: {
+    position: 'absolute',
+    bottom: 15,
+    left: 40,
+    width: 260,
+    height: 25,
+  },
 });
 
 interface AnswerItem {
@@ -233,6 +248,8 @@ export const SurveyArchiveTemplate: React.FC<SurveyArchiveTemplateProps> = ({
             );
           })}
         </View>
+
+        <Image src={footerBannerSrc} style={styles.footerBanner} fixed />
       </Page>
     </Document>
   );
