@@ -16,7 +16,8 @@ import {
   ChevronRight,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  Info
 } from 'lucide-react';
 
 interface LatestResponse {
@@ -248,7 +249,26 @@ export default function AdminDashboard() {
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-shadow">
           <div className="space-y-1">
-            <span className="text-xs text-gray-400 uppercase tracking-wider font-bold">Średnia Zdawalność</span>
+            <span className="text-xs text-gray-400 uppercase tracking-wider font-bold inline-flex items-center gap-1">
+              Średnia Zdawalność
+              <span className="relative inline-flex group/tooltip">
+                <button
+                  type="button"
+                  className="text-gray-300 hover:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a] rounded-full"
+                  aria-describedby="zdawalnosc-tooltip"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                  <span className="sr-only">Co oznacza średnia zdawalność?</span>
+                </button>
+                <span
+                  id="zdawalnosc-tooltip"
+                  role="tooltip"
+                  className="pointer-events-none absolute left-1/2 bottom-full z-10 mb-2 w-64 -translate-x-1/2 rounded-lg bg-[#1a2a3a] p-3 text-[11px] font-normal normal-case leading-snug text-white opacity-0 invisible transition-opacity group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-focus-within/tooltip:visible group-focus-within/tooltip:opacity-100"
+                >
+                  Suma zdobytych punktów podzielona przez sumę punktów możliwych do zdobycia, ze wszystkich dotąd wypełnionych ankiet (Początkowych i Ewaluacyjnych, wszystkie szkoły i edycje łącznie).
+                </span>
+              </span>
+            </span>
             <div className="text-3xl font-bold font-mono">{stats.averageScorePercent}%</div>
           </div>
           <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center">
