@@ -64,6 +64,90 @@ function avgPercent(agg: QuestionAgg): number | null {
   return Math.round((agg.sumPoints / agg.n / agg.maxObserved) * 100);
 }
 
+// Etykieta klasy (np. "7a") bywa co roku ponownie przydzielana zupelnie innemu
+// rocznikowi uczniow, wiec odpowiedzi tej samej "klasy" czesto naleza w
+// rzeczywistosci do 2+ rozlacznych, zebranych w innym czasie grup. Zamiast jednej
+// sztywnej daty granicznej (ktora dla roznych klas wypadala w roznych momentach
+// i wprowadzala wiecej zamieszania niz pozytku - patrz historia tego pliku),
+// wykrywamy grupy automatycznie per-klasa: sortujemy WSZYSTKIE odpowiedzi (P i E)
+// po dacie i tniemy tam, gdzie miedzy kolejnymi zgloszeniami jest przerwa dluzsza
+// niz GROUP_GAP_DAYS. W praktyce odstep miedzy Poczatkowa a Ewaluacyjna w obrebie
+// jednej "fali" to dni/tygodnie, a miedzy rocznikami - miesiace.
+const GROUP_GAP_DAYS = 45;
+const GROUP_GAP_MS = GROUP_GAP_DAYS * 24 * 60 * 60 * 1000;
+
+function formatDatePl(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+interface ResponseGroup {
+  groupIndex: number;
+  label: string;
+  dateFrom: string;
+  dateTo: string;
+  studentsP: number;
+  studentsE: number;
+  bothPandE: number;
+  avgP: number | null;
+  avgE: number | null;
+  delta: number | null;
+}
+
+function detectResponseGroups(
+  responses: any[],
+  sumPercent: (rows: any[]) => number | null
+): ResponseGroup[] {
+  if (responses.length === 0) return [];
+
+  const sorted = [...responses].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+
+  const buckets: any[][] = [];
+  let current: any[] = [];
+  let prevTime: number | null = null;
+  for (const r of sorted) {
+    const t = new Date(r.created_at).getTime();
+    if (prevTime !== null && t - prevTime > GROUP_GAP_MS) {
+      buckets.push(current);
+      current = [];
+    }
+    current.push(r);
+    prevTime = t;
+  }
+  if (current.length > 0) buckets.push(current);
+
+  return buckets.map((rows, i) => {
+    const pRows = rows.filter((r) => r.version === 'P');
+    const eRows = rows.filter((r) => r.version === 'E');
+    const codesWithP = new Set(pRows.map((r) => r.student_code));
+    const codesWithE = new Set(eRows.map((r) => r.student_code));
+    let bothCount = 0;
+    codesWithP.forEach((c) => {
+      if (codesWithE.has(c)) bothCount += 1;
+    });
+
+    const avgPGroup = sumPercent(pRows);
+    const avgEGroup = sumPercent(eRows);
+    const dateFrom = rows[0].created_at;
+    const dateTo = rows[rows.length - 1].created_at;
+
+    return {
+      groupIndex: i + 1,
+      label: `Grupa ${i + 1} (${formatDatePl(dateFrom)} – ${formatDatePl(dateTo)})`,
+      dateFrom,
+      dateTo,
+      studentsP: codesWithP.size,
+      studentsE: codesWithE.size,
+      bothPandE: bothCount,
+      avgP: avgPGroup,
+      avgE: avgEGroup,
+      delta: avgPGroup !== null && avgEGroup !== null ? avgEGroup - avgPGroup : null,
+    };
+  });
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -117,7 +201,7 @@ export async function GET(request: Request) {
 
     if (!schoolParam || !gradeParam) {
       // Sam wybor filtrow jeszcze niekompletny - zwracamy tylko liste dostepnych opcji.
-      return NextResponse.json({ filters, summary: null, questionDifficulty: [] });
+      return NextResponse.json({ filters, summary: null, questionDifficulty: [], groups: [] });
     }
 
     // ---------- 3. Kody uczniow pasujace do wybranej szkoly/klasy ----------
@@ -135,7 +219,7 @@ export async function GET(request: Request) {
       .map((c: any) => c.code);
 
     if (matchingCodes.length === 0) {
-      return NextResponse.json({ filters, summary: null, questionDifficulty: [] });
+      return NextResponse.json({ filters, summary: null, questionDifficulty: [], groups: [] });
     }
 
     // ---------- 4. Odpowiedzi tych uczniow (partiami po kodach, zeby nie przekroczyc dlugosci URL) ----------
@@ -181,6 +265,12 @@ export async function GET(request: Request) {
       delta: avgP !== null && avgE !== null ? avgE - avgP : null,
       participationRate: matchingCodes.length > 0 ? Math.round((bothPandE / matchingCodes.length) * 100) : 0,
     };
+
+    // Automatyczne wykrycie, czy ta "klasa" w rzeczywistosci laczy 2+ rozne roczniki
+    // (patrz komentarz przy detectResponseGroups) - pokazujemy podzial tylko gdy
+    // wykryto wiecej niz jedna grupe, zeby nie zaburzac typowego przypadku.
+    const detectedGroups = detectResponseGroups(responses, sumPercent);
+    const groups = detectedGroups.length > 1 ? detectedGroups : [];
 
     // ---------- 6. Trudnosc pytan - tylko gdy wybrana konkretna runda (taskId) ----------
     let questionDifficulty: any[] = [];
@@ -245,7 +335,7 @@ export async function GET(request: Request) {
         .sort((a, b) => (a.avgPercentE ?? 100) - (b.avgPercentE ?? 100));
     }
 
-    return NextResponse.json({ filters, summary, questionDifficulty, questionCoverage });
+    return NextResponse.json({ filters, summary, questionDifficulty, questionCoverage, groups });
   } catch (error: any) {
     console.error('Analytics classes error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

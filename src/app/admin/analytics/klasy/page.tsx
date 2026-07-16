@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import {
-  School, Users, TrendingUp, ArrowUp, ArrowDown, ArrowUpDown, AlertCircle,
+  School, Users, TrendingUp, ArrowUp, ArrowDown, ArrowUpDown, AlertCircle, Layers,
 } from 'lucide-react';
 
 interface Filters {
@@ -41,7 +41,44 @@ interface QuestionCoverage {
   eTotal: number;
 }
 
+interface ResponseGroup {
+  groupIndex: number;
+  label: string;
+  dateFrom: string;
+  dateTo: string;
+  studentsP: number;
+  studentsE: number;
+  bothPandE: number;
+  avgP: number | null;
+  avgE: number | null;
+  delta: number | null;
+}
+
 type SortColumn = 'question' | 'avgPercentP' | 'avgPercentE' | 'delta';
+
+// Przyrost wzgledny: o ile procent lepszy jest wynik Ewaluacyjny w stosunku do
+// Poczatkowego (a nie tylko o ile punktow procentowych) - przy niskim wyniku startowym
+// sama roznica punktow procentowych zaniza postrzegany postep (np. 2%->11% to +9 pkt
+// proc., ale realnie wynik wzrosl 5,5-krotnie). Uzywane zarowno dla zbiorczego
+// podsumowania, jak i dla kazdej wykrytej grupy/rocznika osobno.
+type RelativeGrowth =
+  | { kind: 'percent'; value: number }
+  | { kind: 'fromZero' }
+  | { kind: 'zero' }
+  | null;
+
+function computeRelativeGrowth(avgP: number | null, avgE: number | null): RelativeGrowth {
+  if (avgP === null || avgE === null) return null;
+  if (avgP === 0) return avgE === 0 ? { kind: 'zero' } : { kind: 'fromZero' };
+  return { kind: 'percent', value: Math.round(((avgE - avgP) / avgP) * 100) };
+}
+
+function relativeGrowthLabel(rg: RelativeGrowth): string | undefined {
+  if (rg?.kind === 'percent') return `${rg.value > 0 ? '+' : ''}${rg.value}% względem wyniku Początkowego`;
+  if (rg?.kind === 'fromZero') return 'wzrost od 0% (brak punktu odniesienia)';
+  if (rg?.kind === 'zero') return 'bez zmian';
+  return undefined;
+}
 
 export default function ClassAnalyticsPage() {
   const [filters, setFilters] = useState<Filters | null>(null);
@@ -54,6 +91,7 @@ export default function ClassAnalyticsPage() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [questionDifficulty, setQuestionDifficulty] = useState<QuestionRow[]>([]);
   const [questionCoverage, setQuestionCoverage] = useState<QuestionCoverage | null>(null);
+  const [groups, setGroups] = useState<ResponseGroup[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,6 +117,7 @@ export default function ClassAnalyticsPage() {
       setSummary(null);
       setQuestionDifficulty([]);
       setQuestionCoverage(null);
+      setGroups([]);
       return;
     }
     const [grade, letter] = classKey.split('|');
@@ -96,6 +135,7 @@ export default function ClassAnalyticsPage() {
         setSummary(json.summary);
         setQuestionDifficulty(json.questionDifficulty || []);
         setQuestionCoverage(json.questionCoverage || null);
+        setGroups(json.groups || []);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoadingData(false));
@@ -139,17 +179,10 @@ export default function ClassAnalyticsPage() {
     ewaluacyjna: q.avgPercentE,
   }));
 
-  // Przyrost wzgledny: o ile procent lepszy jest wynik Ewaluacyjny w stosunku do
-  // Poczatkowego (a nie tylko o ile punktow procentowych) - przy niskim wyniku startowym
-  // sama roznica punktow procentowych zaniza postrzegany postep (np. 2%->11% to +9 pkt
-  // proc., ale realnie wynik wzrosl 5,5-krotnie).
-  const relativeGrowth = useMemo(() => {
-    if (!summary || summary.avgP === null || summary.avgE === null) return null;
-    if (summary.avgP === 0) {
-      return summary.avgE === 0 ? { kind: 'zero' as const } : { kind: 'fromZero' as const };
-    }
-    return { kind: 'percent' as const, value: Math.round(((summary.avgE - summary.avgP) / summary.avgP) * 100) };
-  }, [summary]);
+  const relativeGrowth = useMemo(
+    () => (summary ? computeRelativeGrowth(summary.avgP, summary.avgE) : null),
+    [summary]
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -241,15 +274,7 @@ export default function ClassAnalyticsPage() {
               icon={<TrendingUp className="w-6 h-6" />}
               label="Przyrost Wiedzy (Δ)"
               value={summary.delta !== null ? `${summary.delta > 0 ? '+' : ''}${summary.delta} pkt proc.` : '—'}
-              subValue={
-                relativeGrowth?.kind === 'percent'
-                  ? `${relativeGrowth.value > 0 ? '+' : ''}${relativeGrowth.value}% względem wyniku Początkowego`
-                  : relativeGrowth?.kind === 'fromZero'
-                  ? 'wzrost od 0% (brak punktu odniesienia)'
-                  : relativeGrowth?.kind === 'zero'
-                  ? 'bez zmian'
-                  : undefined
-              }
+              subValue={relativeGrowthLabel(relativeGrowth)}
               color={summary.delta !== null && summary.delta < 0 ? 'red' : 'amber'}
             />
             <SummaryCard
@@ -259,6 +284,56 @@ export default function ClassAnalyticsPage() {
               color="purple"
             />
           </div>
+
+          {groups.length > 1 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-[#1a2a3a] flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-[#c5a059]" />
+                  Wykryto {groups.length} grupy w tej klasie
+                </h2>
+                <p className="text-sm text-gray-500 font-light mt-1">
+                  Odpowiedzi dzielą się na osobne, odległe w czasie fale (prawdopodobnie różne roczniki uczniów pod tą samą etykietą klasy) — poniżej wynik osobno dla każdej, obok zbiorczego podsumowania powyżej.
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
+                      <th className="py-2 pr-4">Grupa (okres)</th>
+                      <th className="py-2 pr-4 text-center">Początkowa (n)</th>
+                      <th className="py-2 pr-4 text-center">Ewaluacyjna (n)</th>
+                      <th className="py-2 pr-4 text-center">Śr. Początkowa</th>
+                      <th className="py-2 pr-4 text-center">Śr. Ewaluacyjna</th>
+                      <th className="py-2 pr-4 text-center">Przyrost</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {groups.map((g) => {
+                      const rg = computeRelativeGrowth(g.avgP, g.avgE);
+                      return (
+                        <tr key={g.groupIndex}>
+                          <td className="py-3 pr-4 font-semibold text-[#1a2a3a]">{g.label}</td>
+                          <td className="py-3 pr-4 text-center font-mono">{g.studentsP}</td>
+                          <td className="py-3 pr-4 text-center font-mono">{g.studentsE}</td>
+                          <td className="py-3 pr-4 text-center font-mono">{g.avgP !== null ? `${g.avgP}%` : '—'}</td>
+                          <td className="py-3 pr-4 text-center font-mono">{g.avgE !== null ? `${g.avgE}%` : '—'}</td>
+                          <td className={`py-3 pr-4 text-center font-mono font-bold ${
+                            g.delta === null ? 'text-gray-400' : g.delta > 0 ? 'text-green-600' : g.delta < 0 ? 'text-red-600' : 'text-gray-500'
+                          }`}>
+                            {g.delta !== null ? `${g.delta > 0 ? '+' : ''}${g.delta} pkt proc.` : '—'}
+                            {rg && (
+                              <div className="text-xs font-normal text-gray-400">{relativeGrowthLabel(rg)}</div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {!taskId ? (
             <div className="p-6 bg-amber-50 text-amber-800 rounded-2xl border border-amber-100 text-sm">
