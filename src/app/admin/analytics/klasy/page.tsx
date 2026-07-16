@@ -139,6 +139,18 @@ export default function ClassAnalyticsPage() {
     ewaluacyjna: q.avgPercentE,
   }));
 
+  // Przyrost wzgledny: o ile procent lepszy jest wynik Ewaluacyjny w stosunku do
+  // Poczatkowego (a nie tylko o ile punktow procentowych) - przy niskim wyniku startowym
+  // sama roznica punktow procentowych zaniza postrzegany postep (np. 2%->11% to +9 pkt
+  // proc., ale realnie wynik wzrosl 5,5-krotnie).
+  const relativeGrowth = useMemo(() => {
+    if (!summary || summary.avgP === null || summary.avgE === null) return null;
+    if (summary.avgP === 0) {
+      return summary.avgE === 0 ? { kind: 'zero' as const } : { kind: 'fromZero' as const };
+    }
+    return { kind: 'percent' as const, value: Math.round(((summary.avgE - summary.avgP) / summary.avgP) * 100) };
+  }, [summary]);
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
@@ -227,8 +239,17 @@ export default function ClassAnalyticsPage() {
             <SummaryCard icon={<TrendingUp className="w-6 h-6" />} label="Śr. wynik Ewaluacyjna" value={summary.avgE !== null ? `${summary.avgE}%` : '—'} color="green" />
             <SummaryCard
               icon={<TrendingUp className="w-6 h-6" />}
-              label="Zmiana (Δ)"
+              label="Przyrost Wiedzy (Δ)"
               value={summary.delta !== null ? `${summary.delta > 0 ? '+' : ''}${summary.delta} pkt proc.` : '—'}
+              subValue={
+                relativeGrowth?.kind === 'percent'
+                  ? `${relativeGrowth.value > 0 ? '+' : ''}${relativeGrowth.value}% względem wyniku Początkowego`
+                  : relativeGrowth?.kind === 'fromZero'
+                  ? 'wzrost od 0% (brak punktu odniesienia)'
+                  : relativeGrowth?.kind === 'zero'
+                  ? 'bez zmian'
+                  : undefined
+              }
               color={summary.delta !== null && summary.delta < 0 ? 'red' : 'amber'}
             />
             <SummaryCard
@@ -318,7 +339,7 @@ export default function ClassAnalyticsPage() {
   );
 }
 
-function SummaryCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: 'blue' | 'green' | 'red' | 'amber' | 'purple' }) {
+function SummaryCard({ icon, label, value, subValue, color }: { icon: React.ReactNode; label: string; value: string; subValue?: string; color: 'blue' | 'green' | 'red' | 'amber' | 'purple' }) {
   const colors: Record<string, string> = {
     blue: 'bg-blue-50 text-blue-600',
     green: 'bg-emerald-50 text-emerald-600',
@@ -331,6 +352,7 @@ function SummaryCard({ icon, label, value, color }: { icon: React.ReactNode; lab
       <div className="space-y-1">
         <span className="text-xs text-gray-400 uppercase tracking-wider font-bold">{label}</span>
         <div className="text-2xl font-bold font-mono text-[#1a2a3a]">{value}</div>
+        {subValue && <div className="text-xs text-gray-400 font-medium">{subValue}</div>}
       </div>
       <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${colors[color]}`}>
         {icon}
