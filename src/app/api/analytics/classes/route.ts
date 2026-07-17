@@ -104,6 +104,7 @@ function detectResponseGroups(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   );
 
+  // 1. Wstepne kubelkowanie po przerwach czasowych (jak wyzej).
   const buckets: any[][] = [];
   let current: any[] = [];
   let prevTime: number | null = null;
@@ -118,7 +119,49 @@ function detectResponseGroups(
   }
   if (current.length > 0) buckets.push(current);
 
-  return buckets.map((rows, i) => {
+  // 2. Scalanie kubelkow, ktore dziela tego samego ucznia (ten sam student_code
+  // w dwoch roznych kubelkach) - to pewny dowod, ze to jedna fala/rocznik, nawet
+  // jesli odstep miedzy Poczatkowa a Ewaluacyjna dla tej klasy byl dluzszy niz
+  // GROUP_GAP_DAYS (np. opozniona administracja Ewaluacyjnej). Sam prog czasowy
+  // nie moze byc idealny dla kazdej klasy - ten sam uczen w dwoch kubelkach jest
+  // znacznie pewniejszym sygnalem niz jakikolwiek pojedynczy prog dni.
+  const parent = buckets.map((_, i) => i);
+  const find = (x: number): number => {
+    while (parent[x] !== x) {
+      parent[x] = parent[parent[x]];
+      x = parent[x];
+    }
+    return x;
+  };
+  const union = (a: number, b: number) => {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent[ra] = rb;
+  };
+
+  const bucketsByCode = new Map<string, number[]>();
+  buckets.forEach((bucket, i) => {
+    for (const r of bucket) {
+      if (!bucketsByCode.has(r.student_code)) bucketsByCode.set(r.student_code, []);
+      bucketsByCode.get(r.student_code)!.push(i);
+    }
+  });
+  for (const indices of bucketsByCode.values()) {
+    for (let k = 1; k < indices.length; k++) union(indices[0], indices[k]);
+  }
+
+  const mergedByRoot = new Map<number, any[]>();
+  buckets.forEach((bucket, i) => {
+    const root = find(i);
+    if (!mergedByRoot.has(root)) mergedByRoot.set(root, []);
+    mergedByRoot.get(root)!.push(...bucket);
+  });
+
+  const finalBuckets = Array.from(mergedByRoot.values())
+    .map((rows) => [...rows].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()))
+    .sort((a, b) => new Date(a[0].created_at).getTime() - new Date(b[0].created_at).getTime());
+
+  return finalBuckets.map((rows, i) => {
     const pRows = rows.filter((r) => r.version === 'P');
     const eRows = rows.filter((r) => r.version === 'E');
     const codesWithP = new Set(pRows.map((r) => r.student_code));
