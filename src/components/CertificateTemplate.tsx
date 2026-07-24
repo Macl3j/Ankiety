@@ -2,6 +2,9 @@
 import React from 'react';
 import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer';
 import path from 'path';
+import fs from 'fs';
+import { normalizeClass } from '@/lib/schoolClassNormalize';
+import { EFEKTY_KSZTALCENIA } from '@/lib/efektyKsztalcenia';
 
 // Zabezpieczenie przed środowiskiem przeglądarki (w razie kompilacji po stronie klienta)
 const isServer = typeof window === 'undefined';
@@ -44,10 +47,17 @@ if (isServer) {
   });
 }
 
+// Wczytujemy obrazy jako bufory ({data, format}) zamiast surowej ścieżki po stronie serwera —
+// @react-pdf/renderer po ścieżce plikowej próbuje ją zresolvować jak URL, co potrafi się wysypać
+// na ścieżkach z odstępami/znakami diakrytycznymi (np. katalogi OneDrive). Bufor omija ten problem.
+function readServerImage(filename: string): { data: Buffer; format: 'png' } | string {
+  if (!isServer) return `/${filename}`;
+  const filePath = path.join(process.cwd(), 'public', filename);
+  return { data: fs.readFileSync(filePath), format: 'png' };
+}
+
 // Belka z logotypami dofinansowania UE - wymagana na kazdym generowanym dokumencie
-const footerBannerSrc = isServer
-  ? path.join(process.cwd(), 'public', 'footer-eu-banner.png')
-  : '/footer-eu-banner.png';
+const footerBannerSrc = readServerImage('footer-eu-banner.png');
 
 // Definicje stylów dla @react-pdf
 const styles = StyleSheet.create({
@@ -203,14 +213,113 @@ const styles = StyleSheet.create({
     color: '#1a2a3a',
     marginTop: 2,
   },
+  signatureSection: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  signatureImage: {
+    width: 140,
+    height: 21.3,
+    marginBottom: 2,
+  },
+  signatureLine: {
+    width: 160,
+    borderTopWidth: 1,
+    borderTopColor: '#999999',
+    marginTop: 2,
+  },
+  signatureName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1a2a3a',
+    marginTop: 4,
+  },
+  signatureTitle: {
+    fontSize: 10,
+    color: '#777777',
+    fontStyle: 'italic',
+  },
   footerBannerSection: {
     alignItems: 'center',
   },
   footerBanner: {
-    width: 220,
-    height: 21,
+    width: 340,
+    height: 32.5,
+  },
+  // --- STRONA 2: EFEKTY KSZTAŁCENIA ---
+  page2: {
+    padding: 0,
+    backgroundColor: '#fcfcf9',
+    fontFamily: 'Merriweather',
+  },
+  page2OuterBorder: {
+    margin: 30,
+    padding: 4,
+    borderWidth: 2,
+    borderColor: '#c5a059',
+    height: '90%',
+  },
+  page2InnerBorder: {
+    borderWidth: 6,
+    borderColor: '#c5a059',
+    padding: 28,
+    height: '100%',
+  },
+  page2Title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1a2a3a',
+    textAlign: 'center',
+    marginBottom: 4,
+    fontFamily: 'Roboto',
+  },
+  page2Subtitle: {
+    fontSize: 11,
+    color: '#555555',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  effectBlock: {
+    marginBottom: 8,
+  },
+  effectHeading: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#1a2a3a',
+    marginBottom: 3,
+    fontFamily: 'Roboto',
+  },
+  effectPoint: {
+    fontSize: 9.5,
+    color: '#333333',
+    marginBottom: 2,
+    paddingLeft: 10,
+  },
+  effectCriterion: {
+    fontSize: 9,
+    color: '#777777',
+    fontStyle: 'italic',
+    marginTop: 2,
+    paddingLeft: 10,
+  },
+  page2Validation: {
+    fontSize: 9,
+    color: '#555555',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  page2Hours: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#1a2a3a',
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
+
+// Skan podpisu przełożonego - wymagany na kazdym generowanym certyfikacie
+const signatureImageSrc = readServerImage('signature-kania.png');
 
 interface CertificateData {
   studentName: string;
@@ -221,6 +330,7 @@ interface CertificateData {
   wynikP: string;
   wynikE: string;
   przyrost: string;
+  studentClass?: string;
 }
 
 export const CertificateTemplate = ({
@@ -232,7 +342,12 @@ export const CertificateTemplate = ({
   wynikP,
   wynikE,
   przyrost,
-}: CertificateData) => (
+  studentClass,
+}: CertificateData) => {
+  const efektyGrade = normalizeClass(studentClass).grade;
+  const efekty = EFEKTY_KSZTALCENIA[efektyGrade];
+
+  return (
   <Document>
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.outerBorder}>
@@ -288,6 +403,14 @@ export const CertificateTemplate = ({
             <Text style={styles.dateValue}>{dateStr}</Text>
           </View>
 
+          {/* Podpis */}
+          <View style={styles.signatureSection}>
+            <Image src={signatureImageSrc} style={styles.signatureImage} />
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureName}>Sebastian Kania</Text>
+            <Text style={styles.signatureTitle}>Supervisor</Text>
+          </View>
+
           {/* Belka dofinansowania UE */}
           <View style={styles.footerBannerSection}>
             <Image src={footerBannerSrc} style={styles.footerBanner} />
@@ -295,5 +418,40 @@ export const CertificateTemplate = ({
         </View>
       </View>
     </Page>
+
+    {/* Strona 2: Efekty kształcenia dla klasy ucznia (2/5/7) */}
+    {efekty && (
+      <Page size="A4" orientation="landscape" style={styles.page2}>
+        <View style={styles.page2OuterBorder}>
+          <View style={styles.page2InnerBorder}>
+            <Text style={styles.page2Title}>Efekty kształcenia</Text>
+            <Text style={styles.page2Subtitle}>
+              Klasa {efekty.klasa} - w trakcie zajęć uczeń nabył następujące kompetencje:
+            </Text>
+
+            {efekty.efekty.map((e) => (
+              <View key={e.numer} style={styles.effectBlock}>
+                <Text style={styles.effectHeading}>
+                  Efekt nr {e.numer}: {e.kompetencja}
+                </Text>
+                {e.punkty.map((p, i) => (
+                  <Text key={i} style={styles.effectPoint}>- {p}</Text>
+                ))}
+                <Text style={styles.effectCriterion}>
+                  Kryterium weryfikacji efektu nr {e.numer}: {e.kryterium}
+                </Text>
+              </View>
+            ))}
+
+            {efekty.walidacja && efekty.walidacja.map((line, i) => (
+              <Text key={i} style={styles.page2Validation}>{line}</Text>
+            ))}
+
+            <Text style={styles.page2Hours}>{efekty.wymiarZajec}</Text>
+          </View>
+        </View>
+      </Page>
+    )}
   </Document>
-);
+  );
+};

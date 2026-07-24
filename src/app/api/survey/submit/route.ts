@@ -145,6 +145,7 @@ export async function POST(request: Request) {
           wynikP: wynikP_str,
           wynikE: wynikE_str,
           przyrost: przyrost_str,
+          studentClass: student.class,
         }) as any
       );
 

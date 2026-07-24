@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       .from('responses')
       .select(`
         *,
-        codes (first_name, last_name),
+        codes (first_name, last_name, class),
         surveys (title)
       `)
       .eq('id', responseId)
@@ -85,6 +85,7 @@ export async function GET(request: Request) {
         wynikP: sanitizeText(wynikP_str),
         wynikE: sanitizeText(wynikE_str),
         przyrost: sanitizeText(przyrost_str),
+        studentClass: studentInfo.class,
       }) as any
     );
 
