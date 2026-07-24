@@ -370,7 +370,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 text-center">
                         <a
-                          href={r.cert_pdf_url || `/api/pdf/certificate?responseId=${r.id}`}
+                          href={`/api/pdf/certificate?responseId=${r.id}`}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
