@@ -4,6 +4,7 @@ import { renderToStream } from '@react-pdf/renderer';
 import { CertificateTemplate } from '@/components/CertificateTemplate';
 import { supabaseAdmin } from '@/lib/supabaseClient';
 import { sanitizeText, asciiFilename } from '@/lib/pdfSanitize';
+import { fetchCertificateImages } from '@/lib/certificateAssets';
 
 export async function GET(request: Request) {
   try {
@@ -74,7 +75,10 @@ export async function GET(request: Request) {
     const studentName = sanitizeText(`${studentInfo.first_name} ${studentInfo.last_name}`);
     const dateStr = sanitizeText(new Date(response.created_at).toLocaleDateString('pl-PL'));
 
-    // 3. Generujemy strumień PDF z szablonu Reactowego
+    // 3. Pobranie banera UE i podpisu z Supabase Storage (z fallbackiem na public/ w certificateAssets.ts)
+    const { bannerImage, signatureImage } = await fetchCertificateImages();
+
+    // 4. Generujemy strumień PDF z szablonu Reactowego
     const stream = await renderToStream(
       React.createElement(CertificateTemplate, {
         studentName,
@@ -86,6 +90,8 @@ export async function GET(request: Request) {
         wynikE: sanitizeText(wynikE_str),
         przyrost: sanitizeText(przyrost_str),
         studentClass: studentInfo.class,
+        bannerImage,
+        signatureImage,
       }) as any
     );
 

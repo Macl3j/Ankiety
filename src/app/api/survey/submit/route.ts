@@ -6,6 +6,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { CertificateTemplate } from '@/components/CertificateTemplate';
 import { SurveyArchiveTemplate } from '@/components/SurveyArchiveTemplate';
 import { sanitizeText } from '@/lib/pdfSanitize';
+import { fetchCertificateImages } from '@/lib/certificateAssets';
 
 export async function POST(request: Request) {
   try {
@@ -134,6 +135,9 @@ export async function POST(request: Request) {
     let certUrl = null;
 
     try {
+      // Pobranie banera UE i podpisu z Supabase Storage (z fallbackiem na public/ w certificateAssets.ts)
+      const { bannerImage, signatureImage } = await fetchCertificateImages();
+
       // Renderowanie certyfikatu do bufora binarnego na serwerze
       const pdfBuffer = await renderToBuffer(
         React.createElement(CertificateTemplate, {
@@ -146,6 +150,8 @@ export async function POST(request: Request) {
           wynikE: wynikE_str,
           przyrost: przyrost_str,
           studentClass: student.class,
+          bannerImage,
+          signatureImage,
         }) as any
       );
 

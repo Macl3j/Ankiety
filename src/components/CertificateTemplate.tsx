@@ -56,8 +56,15 @@ function readServerImage(filename: string): { data: Buffer; format: 'png' } | st
   return { data: fs.readFileSync(filePath), format: 'png' };
 }
 
-// Belka z logotypami dofinansowania UE - wymagana na kazdym generowanym dokumencie
-const footerBannerSrc = readServerImage('footer-eu-banner.png');
+// Domyslne obrazy zbundlowane w public/ - wczytywane leniwie (dopiero gdy faktycznie
+// potrzebne), zeby brak lokalnego pliku nie wywalal renderu w przypadkach, gdy wywolujacy
+// i tak dostarcza wlasny bannerImage/signatureImage (np. pobrany z Supabase Storage).
+function defaultBannerSrc() {
+  return readServerImage('footer-eu-banner.png');
+}
+function defaultSignatureSrc() {
+  return readServerImage('signature-kania.png');
+}
 
 // Definicje stylów dla @react-pdf
 const styles = StyleSheet.create({
@@ -318,9 +325,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Skan podpisu przełożonego - wymagany na kazdym generowanym certyfikacie
-const signatureImageSrc = readServerImage('signature-kania.png');
-
 interface CertificateData {
   studentName: string;
   surveyTitle: string;
@@ -331,6 +335,8 @@ interface CertificateData {
   wynikE: string;
   przyrost: string;
   studentClass?: string;
+  bannerImage?: { data: Buffer; format: 'png' } | string;
+  signatureImage?: { data: Buffer; format: 'png' } | string;
 }
 
 export const CertificateTemplate = ({
@@ -343,9 +349,13 @@ export const CertificateTemplate = ({
   wynikE,
   przyrost,
   studentClass,
+  bannerImage,
+  signatureImage,
 }: CertificateData) => {
   const efektyGrade = normalizeClass(studentClass).grade;
   const efekty = EFEKTY_KSZTALCENIA[efektyGrade];
+  const footerBannerSrc = bannerImage ?? defaultBannerSrc();
+  const signatureImageSrc = signatureImage ?? defaultSignatureSrc();
 
   return (
   <Document>
