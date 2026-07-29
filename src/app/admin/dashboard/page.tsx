@@ -17,8 +17,19 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
-  Info
+  Info,
+  Pencil,
+  X,
+  Save,
+  AlertCircle
 } from 'lucide-react';
+
+interface StudentEditForm {
+  first_name: string;
+  last_name: string;
+  school: string;
+  class: string;
+}
 
 interface LatestResponse {
   id: string;
@@ -75,6 +86,65 @@ export default function AdminDashboard() {
       setSortAsc(true);
     }
     setCurrentPage(1);
+  };
+
+  // Edycja błędnie zapisanych danych ucznia (imię, nazwisko, szkoła, klasa) wprost z dashboardu.
+  // Kod ucznia (`code`) celowo nie jest edytowalny — to klucz, po którym `responses` odwołuje się
+  // do `codes`, więc jego zmiana wymagałaby oddzielnej, bardziej ostrożnej ścieżki (patrz Kody Uczniów).
+  const [editingCode, setEditingCode] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<StudentEditForm>({ first_name: '', last_name: '', school: '', class: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const openEdit = (studentInfo: LatestResponse['codes']) => {
+    if (!studentInfo) return;
+    setEditingCode(studentInfo.code);
+    setEditForm({
+      first_name: studentInfo.first_name || '',
+      last_name: studentInfo.last_name || '',
+      school: studentInfo.school || '',
+      class: studentInfo.class || '',
+    });
+    setEditError(null);
+  };
+
+  const closeEdit = () => {
+    setEditingCode(null);
+    setEditError(null);
+  };
+
+  const handleUpdateStudent = async () => {
+    if (!editingCode) return;
+    setEditSaving(true);
+    setEditError(null);
+
+    try {
+      const { error } = await supabase
+        .from('codes')
+        .update({
+          first_name: editForm.first_name.trim(),
+          last_name: editForm.last_name.trim(),
+          school: editForm.school.trim(),
+          class: editForm.class.trim(),
+        })
+        .eq('code', editingCode);
+
+      if (error) throw error;
+
+      // Odświeżamy aktualnie wczytaną stronę tabeli, żeby od razu pokazać poprawione dane
+      setPageResponses(prev =>
+        prev.map(r =>
+          r.codes && r.codes.code === editingCode
+            ? { ...r, codes: { ...r.codes, ...editForm } }
+            : r
+        )
+      );
+      setEditingCode(null);
+    } catch (err: any) {
+      setEditError('Błąd zapisu: ' + err.message);
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   // Statystyki KPI ładowane raz przy wejściu na stronę
@@ -340,9 +410,19 @@ export default function AdminDashboard() {
                     <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="py-4 font-semibold text-[#1a2a3a]">
                         {studentInfo ? (
-                          <div className="flex flex-col">
-                            <span>{studentInfo.first_name} {studentInfo.last_name}</span>
-                            <span className="text-xs text-gray-400 font-normal">Kod: {studentInfo.code}</span>
+                          <div className="flex items-start gap-2">
+                            <div className="flex flex-col">
+                              <span>{studentInfo.first_name} {studentInfo.last_name}</span>
+                              <span className="text-xs text-gray-400 font-normal">Kod: {studentInfo.code}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => openEdit(studentInfo)}
+                              aria-label={`Edytuj dane ucznia ${studentInfo.first_name} ${studentInfo.last_name}`}
+                              className="p-1 text-gray-300 hover:text-[#1a2a3a] hover:bg-gray-100 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a2a3a]"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         ) : 'Nieznany Uczeń'}
                       </td>
@@ -440,6 +520,106 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* Modal edycji danych ucznia */}
+      {editingCode && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={closeEdit}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-student-title"
+          >
+            <div className="flex items-center justify-between mb-1">
+              <h3 id="edit-student-title" className="text-lg font-serif font-bold text-[#1a2a3a]">
+                Edytuj dane ucznia
+              </h3>
+              <button
+                type="button"
+                onClick={closeEdit}
+                aria-label="Zamknij"
+                className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 font-mono mb-5">Kod: {editingCode}</p>
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="edit-first-name" className="block text-xs font-semibold text-gray-500 mb-1">Imię</label>
+                <input
+                  id="edit-first-name"
+                  type="text"
+                  value={editForm.first_name}
+                  onChange={(e) => setEditForm(f => ({ ...f, first_name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-last-name" className="block text-xs font-semibold text-gray-500 mb-1">Nazwisko</label>
+                <input
+                  id="edit-last-name"
+                  type="text"
+                  value={editForm.last_name}
+                  onChange={(e) => setEditForm(f => ({ ...f, last_name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-school" className="block text-xs font-semibold text-gray-500 mb-1">Szkoła</label>
+                <input
+                  id="edit-school"
+                  type="text"
+                  value={editForm.school}
+                  onChange={(e) => setEditForm(f => ({ ...f, school: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-class" className="block text-xs font-semibold text-gray-500 mb-1">Klasa</label>
+                <input
+                  id="edit-class"
+                  type="text"
+                  value={editForm.class}
+                  onChange={(e) => setEditForm(f => ({ ...f, class: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2a3a] transition-all"
+                />
+              </div>
+            </div>
+
+            {editError && (
+              <div className="mt-4 flex items-center gap-2 text-sm text-red-600">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{editError}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 mt-6">
+              <button
+                type="button"
+                onClick={closeEdit}
+                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Anuluj
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateStudent}
+                disabled={editSaving}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1a2a3a] hover:bg-[#0f1926] text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Save className="w-4 h-4" />
+                {editSaving ? 'Zapisywanie...' : 'Aktualizuj w Bazie'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
