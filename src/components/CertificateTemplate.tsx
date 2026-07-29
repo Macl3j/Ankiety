@@ -352,7 +352,12 @@ export const CertificateTemplate = ({
   bannerImage,
   signatureImage,
 }: CertificateData) => {
-  const efektyGrade = normalizeClass(studentClass).grade;
+  // Pole `class` u ucznia bywa puste (błąd wpisu przy imporcie/ankiecie) - w takim przypadku
+  // sięgamy po klasę zakodowaną w tytule ankiety ("Ankieta Ewaluacyjna - Klasa 5"), która jest
+  // ustalona dla każdej ankiety i dużo pewniejsza niż ręcznie wpisywane dane ucznia.
+  const classGrade = normalizeClass(studentClass).grade;
+  const titleGradeMatch = surveyTitle.match(/klasa\s+(\d+)/i);
+  const efektyGrade = EFEKTY_KSZTALCENIA[classGrade] ? classGrade : (titleGradeMatch?.[1] ?? classGrade);
   const efekty = EFEKTY_KSZTALCENIA[efektyGrade];
   const footerBannerSrc = bannerImage ?? defaultBannerSrc();
   const signatureImageSrc = signatureImage ?? defaultSignatureSrc();
