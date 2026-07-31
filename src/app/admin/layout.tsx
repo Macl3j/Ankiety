@@ -20,31 +20,54 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+// Ścieżki dostępne dla roli 'kpi_viewer' (ograniczony dostęp - tylko Dashboard KPI).
+// Każda inna rola (w tym domyślna 'admin' oraz brak wiersza w `profiles`) widzi cały panel.
+const KPI_VIEWER_ALLOWED_PATHS = ['/admin/dashboard'];
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string>('admin');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Sprawdzamy sesję przy załadowaniu i zmianie ścieżki
+  const isKpiViewer = role === 'kpi_viewer';
+
+  // Sprawdzamy sesję i rolę przy załadowaniu i zmianie ścieżki
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         setUser(null);
+        setRole('admin');
         // Jeśli nie ma sesji i jesteśmy w podkatalogu admina, przekieruj do /admin
         if (pathname !== '/admin') {
           router.push('/admin');
         }
-      } else {
-        setUser(session.user);
-        // Jeśli jest sesja i jesteśmy na stronie logowania, przekieruj do dashboardu
-        if (pathname === '/admin') {
-          router.push('/admin/dashboard');
-        }
+        setLoading(false);
+        return;
       }
+
+      setUser(session.user);
+
+      // Domyślnie 'admin' (pełny dostęp) - zarówno gdy profil jeszcze nie istnieje,
+      // jak i przy błędzie odczytu, żeby awaria tego zapytania nigdy nikogo nie zablokowała.
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .maybeSingle();
+      const currentRole = profile?.role || 'admin';
+      setRole(currentRole);
+
+      if (pathname === '/admin') {
+        router.push('/admin/dashboard');
+      } else if (currentRole === 'kpi_viewer' && !KPI_VIEWER_ALLOWED_PATHS.includes(pathname)) {
+        router.push('/admin/dashboard');
+      }
+
       setLoading(false);
     };
 
@@ -54,12 +77,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         setUser(null);
+        setRole('admin');
         if (pathname !== '/admin') router.push('/admin');
-      } else {
-        setUser(session.user);
-        if (pathname === '/admin') router.push('/admin/dashboard');
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
@@ -112,71 +133,75 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span>Dashboard KPI</span>
           </Link>
 
-          <Link
-            href="/admin/surveys"
-            aria-current={pathname.startsWith('/admin/surveys') ? 'page' : undefined}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-              pathname.startsWith('/admin/surveys') ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <ClipboardList className="w-5 h-5" />
-            <span>Zarządzaj Ankietami</span>
-          </Link>
+          {!isKpiViewer && (
+            <>
+              <Link
+                href="/admin/surveys"
+                aria-current={pathname.startsWith('/admin/surveys') ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+                  pathname.startsWith('/admin/surveys') ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <ClipboardList className="w-5 h-5" />
+                <span>Zarządzaj Ankietami</span>
+              </Link>
 
-          <Link
-            href="/admin/analytics"
-            aria-current={pathname === '/admin/analytics' ? 'page' : undefined}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-              pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <LineChart className="w-5 h-5" />
-            <span>Analityka</span>
-          </Link>
+              <Link
+                href="/admin/analytics"
+                aria-current={pathname === '/admin/analytics' ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+                  pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <LineChart className="w-5 h-5" />
+                <span>Analityka</span>
+              </Link>
 
-          <Link
-            href="/admin/analytics/klasy"
-            aria-current={pathname === '/admin/analytics/klasy' ? 'page' : undefined}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-              pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <GraduationCap className="w-5 h-5" />
-            <span>Ewaluacja Klas</span>
-          </Link>
+              <Link
+                href="/admin/analytics/klasy"
+                aria-current={pathname === '/admin/analytics/klasy' ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+                  pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <GraduationCap className="w-5 h-5" />
+                <span>Ewaluacja Klas</span>
+              </Link>
 
-          <Link
-            href="/admin/codes"
-            aria-current={pathname === '/admin/codes' ? 'page' : undefined}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-              pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <QrCode className="w-5 h-5" />
-            <span>Kody Uczniów</span>
-          </Link>
+              <Link
+                href="/admin/codes"
+                aria-current={pathname === '/admin/codes' ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+                  pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <QrCode className="w-5 h-5" />
+                <span>Kody Uczniów</span>
+              </Link>
 
-          <Link
-            href="/admin/import-sheet"
-            aria-current={pathname === '/admin/import-sheet' ? 'page' : undefined}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-              pathname === '/admin/import-sheet' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <CloudDownload className="w-5 h-5" />
-            <span>Import z Arkusza</span>
-          </Link>
+              <Link
+                href="/admin/import-sheet"
+                aria-current={pathname === '/admin/import-sheet' ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+                  pathname === '/admin/import-sheet' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <CloudDownload className="w-5 h-5" />
+                <span>Import z Arkusza</span>
+              </Link>
 
-          <Link
-            href="/admin/certyfikat"
-            aria-current={pathname === '/admin/certyfikat' ? 'page' : undefined}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-              pathname === '/admin/certyfikat' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <Award className="w-5 h-5" />
-            <span>Certyfikat</span>
-          </Link>
+              <Link
+                href="/admin/certyfikat"
+                aria-current={pathname === '/admin/certyfikat' ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
+                  pathname === '/admin/certyfikat' ? 'bg-[#c5a059] text-white font-bold shadow-md' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <Award className="w-5 h-5" />
+                <span>Certyfikat</span>
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-[#2b3c4f] space-y-3">
@@ -221,77 +246,81 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span>Dashboard KPI</span>
               </Link>
 
-              <Link
-                href="/admin/surveys"
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname.startsWith('/admin/surveys') ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                  pathname.startsWith('/admin/surveys') ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
-                }`}
-              >
-                <ClipboardList className="w-5 h-5" />
-                <span>Zarządzaj Ankietami</span>
-              </Link>
+              {!isKpiViewer && (
+                <>
+                  <Link
+                    href="/admin/surveys"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-current={pathname.startsWith('/admin/surveys') ? 'page' : undefined}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                      pathname.startsWith('/admin/surveys') ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <ClipboardList className="w-5 h-5" />
+                    <span>Zarządzaj Ankietami</span>
+                  </Link>
 
-              <Link
-                href="/admin/analytics"
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname === '/admin/analytics' ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                  pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
-                }`}
-              >
-                <LineChart className="w-5 h-5" />
-                <span>Analityka</span>
-              </Link>
+                  <Link
+                    href="/admin/analytics"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-current={pathname === '/admin/analytics' ? 'page' : undefined}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                      pathname === '/admin/analytics' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <LineChart className="w-5 h-5" />
+                    <span>Analityka</span>
+                  </Link>
 
-              <Link
-                href="/admin/analytics/klasy"
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname === '/admin/analytics/klasy' ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                  pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
-                }`}
-              >
-                <GraduationCap className="w-5 h-5" />
-                <span>Ewaluacja Klas</span>
-              </Link>
+                  <Link
+                    href="/admin/analytics/klasy"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-current={pathname === '/admin/analytics/klasy' ? 'page' : undefined}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                      pathname === '/admin/analytics/klasy' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <GraduationCap className="w-5 h-5" />
+                    <span>Ewaluacja Klas</span>
+                  </Link>
 
-              <Link
-                href="/admin/codes"
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname === '/admin/codes' ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                  pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
-                }`}
-              >
-                <QrCode className="w-5 h-5" />
-                <span>Kody Uczniów</span>
-              </Link>
+                  <Link
+                    href="/admin/codes"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-current={pathname === '/admin/codes' ? 'page' : undefined}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                      pathname === '/admin/codes' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <QrCode className="w-5 h-5" />
+                    <span>Kody Uczniów</span>
+                  </Link>
 
-              <Link
-                href="/admin/import-sheet"
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname === '/admin/import-sheet' ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                  pathname === '/admin/import-sheet' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
-                }`}
-              >
-                <CloudDownload className="w-5 h-5" />
-                <span>Import z Arkusza</span>
-              </Link>
+                  <Link
+                    href="/admin/import-sheet"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-current={pathname === '/admin/import-sheet' ? 'page' : undefined}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                      pathname === '/admin/import-sheet' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <CloudDownload className="w-5 h-5" />
+                    <span>Import z Arkusza</span>
+                  </Link>
 
-              <Link
-                href="/admin/certyfikat"
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname === '/admin/certyfikat' ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                  pathname === '/admin/certyfikat' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
-                }`}
-              >
-                <Award className="w-5 h-5" />
-                <span>Certyfikat</span>
-              </Link>
+                  <Link
+                    href="/admin/certyfikat"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-current={pathname === '/admin/certyfikat' ? 'page' : undefined}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
+                      pathname === '/admin/certyfikat' ? 'bg-[#c5a059] text-white font-bold' : 'text-gray-300 hover:bg-white/5'
+                    }`}
+                  >
+                    <Award className="w-5 h-5" />
+                    <span>Certyfikat</span>
+                  </Link>
+                </>
+              )}
             </nav>
 
             <div className="p-4 border-t border-[#2b3c4f] space-y-3">
